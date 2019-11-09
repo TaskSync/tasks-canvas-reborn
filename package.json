@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@material-ui/core": "^4.5.2",
+    "mobx": "^5.14.2",
+    "mobx-react": "^6.1.4",
+    "mobx-router-rise": "^0.0.13",
+    "parcel-bundler": "^1.12.4",
+    "prettier": "^1.18.2",
+    "react": "^16.11.0",
+    "@material-ui/icons": "^3.0.1",
+    "store": "^2.0.12",
+    "typescript": "^3.7.1-rc"
+  },
+  "scripts": {
+    "serve": "node src/serve.js & local-ssl-proxy --source 3000 --target 5000",
+    "tsc": "tsc --project tsconfig.prod.json",
+    "build": "rm -Rf dist/build; mkdir -p dist; parcel build --out-dir dist/build src/index.html; cp -fR src/¡assets dist/build/; workbox generateSW scripts/workbox-prod.js",
+    "start": "yarn set-build:dev; yarn clean:build-dev; parcel --out-dir dist/build-dev src/index.html --https",
+    "start-http": "yarn set-build:dev; yarn clean:build-dev; parcel --out-dir dist/build-dev src/index.html"
+  },
+  "name": "tasks-canvas-reborn",
+  "version": "1.0.0",
+  "main": "src/main.tsx",
+  "author": "Tobiasz Cudnik <tobiasz.cudnik@gmail.com>",
+  "license": "MIT"
+}

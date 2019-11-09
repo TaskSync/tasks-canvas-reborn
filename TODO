@@ -1,0 +1,14 @@
+- list UI
+  - key navigation
+- bind to the sync engine
+- left menu with task lists
+- Navigation mode
+  - SPECIAL+N to switch
+  - ESC to quit
+  - search as you type
+  - left back
+  - right enter
+  - list of task lists on the task list
+- MC mode
+  - second panel
+  - move function
