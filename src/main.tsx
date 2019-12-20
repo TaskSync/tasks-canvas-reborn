@@ -6,7 +6,6 @@ import ReactDOM from 'react-dom';
 import config from './config.json';
 import App from './containers/App';
 import './polyfills';
-import * as serviceWorker from './registerServiceWorker';
 import * as routes from './routes';
 import { TConfig, TStores } from './stores';
 import RootStore from './stores/root';
@@ -16,12 +15,7 @@ startRouter(routes, store, { strict: false });
 
 const stores: TStores = {
   store,
-  langStore: store.lang,
-  onboardingStore: store.onboarding,
-  walletStore: store.wallet,
   routerStore: store.router,
-  addressBookStore: store.addressBook,
-  ledgerStore: store.ledger
 };
 
 const root = (
@@ -31,10 +25,3 @@ const root = (
 );
 
 ReactDOM.render(root, document.getElementById('root') as HTMLElement);
-
-const isDesktop = typeof carlo !== 'undefined';
-if (!isDesktop) {
-  serviceWorker.register(store);
-} else {
-  serviceWorker.unregister();
-}

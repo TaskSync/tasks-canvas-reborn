@@ -5,15 +5,17 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
+import ReactDOM from "react-dom";
 import {
   createStyles,
   makeStyles,
-  createMuiTheme, Theme
+  createMuiTheme,
+  Theme
 } from "@material-ui/core/styles";
 import CommentIcon from "@material-ui/icons/Comment";
 import React from "react";
 
-const theme = createMuiTheme();
+// const theme = createMuiTheme();
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -21,11 +23,14 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100%",
       maxWidth: 360,
       backgroundColor: "white"
+    },
+    ListItem: {
+      background: 'red'
     }
   })
 );
 
-export default function CheckboxList() {
+export default function ListUI() {
   const classes = useStyles({});
   const [checked, setChecked] = React.useState([0]);
 
@@ -42,6 +47,9 @@ export default function CheckboxList() {
     setChecked(newChecked);
   };
 
+  {
+    /*<ThemeProvider>*/
+  }
   return (
     <List className={classes.root}>
       {[0, 1, 2, 3].map(value => {
@@ -76,3 +84,7 @@ export default function CheckboxList() {
     </List>
   );
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  ReactDOM.render(<ListUI />, document.body as HTMLElement);
+});

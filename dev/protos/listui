@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# TODO fix
+echo "!!! Run from the project root"
+
+npx parcel dev/protos/listui.html
