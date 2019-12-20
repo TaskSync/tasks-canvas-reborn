@@ -1,0 +1,12 @@
+node_modules
+.cache
+.idea/.gitignore
+.idea/$CACHE_FILE$
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/tasks-canvas-reborn.iml
+.idea/vcs.xml
+dist/listui.94170cae.js
+dist/listui.94170cae.js.map
+dist/listui.html
