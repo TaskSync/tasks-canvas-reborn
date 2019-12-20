@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: "white"
     },
     ListItem: {
-      background: 'red'
+      background: "red"
     }
   })
 );
