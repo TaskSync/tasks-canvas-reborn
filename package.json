@@ -2,6 +2,7 @@
   "dependencies": {
     "@material-ui/core": "^4.5.2",
     "@material-ui/icons": "^3.0.1",
+    "classnames": "^2.2.6",
     "mobx": "^5.14.2",
     "mobx-react": "^6.1.4",
     "mobx-router-rise": "^0.0.13",
@@ -10,7 +11,8 @@
     "react": "^16.11.0",
     "react-dom": "latest",
     "store": "^2.0.12",
-    "typescript": "^3.7.1-rc"
+    "typescript": "^3.7.4",
+    "uniqid": "^5.2.0"
   },
   "scripts": {
     "serve": "node src/serve.js & local-ssl-proxy --source 3000 --target 5000",
