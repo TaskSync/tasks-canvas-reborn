@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "module": "esnext",
-    "target": "esnext",
+    "target": "es2018",
     "lib": [
       "es6",
       "dom",
@@ -18,7 +18,6 @@
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-//    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "strict": false,
     "resolveJsonModule": true,
@@ -26,7 +25,8 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "skipDefaultLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "optionalChaining": true
   },
   "exclude": [
     "src/serve.js"

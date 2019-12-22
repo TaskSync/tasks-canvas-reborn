@@ -1,27 +1,59 @@
-import Checkbox from "@material-ui/core/Checkbox";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import React, { KeyboardEvent, MouseEvent, useState, useReducer } from "react";
-import ReactDOM from "react-dom";
+import Checkbox from "@material-ui/core/es/Checkbox";
+import List from "@material-ui/core/es/List";
+import ListItem from "@material-ui/core/es/ListItem";
+import ListItemIcon from "@material-ui/core/es/ListItemIcon";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/es/styles";
+import ArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import classnames from "classnames";
+import React, {
+  KeyboardEvent,
+  MouseEvent,
+  FocusEvent,
+  useState,
+  useReducer,
+  createRef
+} from "react";
+import ReactDOM from "react-dom";
+import uniqid from "uniqid";
 
 // const theme = createMuiTheme();
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    list: {
       width: "100%",
-      maxWidth: 360,
-      backgroundColor: "white"
+      backgroundColor: "white",
+      padding: 0
     },
-    row: {
-      height: "1.5em"
+    item: {
+      height: "1.3em",
+      padding: 0,
+      margin: "0.1em 0",
+      "&:hover": {
+        // TODO !important
+        "background-color": "transparent !important"
+      }
     },
     selected: {
-      background: "grey"
+      border: "1px solid yellow",
+      "border-width": "1px 0",
+      // TODO !important
+      "background-color": "#fffff7 !important",
+      "&:hover": {
+        // TODO !important
+        "background-color": "#fffff7 !important"
+      }
+    },
+    text: {
+      width: "100%",
+      outline: "0px solid transparent"
+      // TODO no line breaks
+    },
+    arrow: {
+      "margin-right": "10px"
+    },
+    checkbox: {
+      padding: 0
     }
   })
 );
@@ -38,12 +70,17 @@ const tasks: TTask[] = [
   { id: "id-3", text: "test 4" }
 ];
 
-type Action = { type: "update"; task: TTask };
+type Action = { type: "update"; task: TTask } | { type: "indent"; id: string };
 function tasksReducer(state: TTask[], action: Action) {
   switch (action.type) {
     case "update":
       const task = state.find(task => task.id === action.task.id);
       task.text = action.task.text;
+      console.log(`updated ${action.task.id} with`, task.text);
+      return [...state];
+    case "indent":
+      // TODO
+      console.log(`indent ${action.id}`);
       return [...state];
   }
 }
@@ -58,6 +95,7 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
     return list.find(task => task.id === id);
   }
 
+  // TODO delegate
   function handleKey(id: string) {
     return (event: KeyboardEvent<HTMLElement>) => {
       const task = getTaskByID(id);
@@ -75,18 +113,16 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
         }
         setFocusedID(list[indexChanged].id);
         event.preventDefault();
-      } else {
-        // edit text
-        if (event.key === "Tab") {
-          // catch tab for text input
-          event.preventDefault();
-        }
-        task.text += String.fromCharCode(event.keyCode);
-        dispatchList({ type: "update", task });
+      } else if (event.key === "Tab") {
+        // indent
+        // TODO indent the task
+        event.preventDefault();
+        dispatchList({ type: "indent", id });
       }
     };
   }
 
+  // TODO delegate
   function handleClick(id: string) {
     return (event: MouseEvent<HTMLElement>) => {
       setFocusedID(id);
@@ -94,17 +130,28 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
     };
   }
 
+  // TODO delegate
+  function handleBlur(id: string) {
+    return (event: FocusEvent<HTMLSpanElement>) => {
+      const task = getTaskByID(id);
+      task.text = event.target.textContent;
+      dispatchList({ type: "update", task });
+    };
+  }
+
   return (
-    <List className={classes.root}>
+    <List className={classes.list}>
       {list.map(task => {
         const { id, text } = task;
         const labelId = `checkbox-list-label-${id}`;
         const isSelected = id === focusedID;
+        const domID = uniqid();
 
         return (
           <ListItem
+            disableRipple
             className={classnames(
-              classes.row,
+              classes.item,
               isSelected ? classes.selected : null
             )}
             key={id}
@@ -114,10 +161,12 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
             onClick={handleClick(id)}
             onKeyDown={handleKey(id)}
             selected={id === focusedID}
-            autoFocus={focusedID === id}
           >
             <ListItemIcon>
+              {/*TODO fix the array children error */}
+              <ArrowDownIcon className={classes.arrow} />
               <Checkbox
+                className={classes.checkbox}
                 edge="start"
                 checked={checked.includes(id)}
                 tabIndex={-1}
@@ -125,7 +174,15 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
                 inputProps={{ "aria-labelledby": labelId }}
               />
             </ListItemIcon>
-            <ListItemText id={labelId} primary={text} />
+            <span
+              onBlur={handleBlur(id)}
+              id={domID}
+              contentEditable={true}
+              suppressContentEditableWarning={true}
+              className={classes.text}
+            >
+              {text}
+            </span>
           </ListItem>
         );
       })}
