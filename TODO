@@ -1,14 +1,20 @@
-- list UI
-  - key navigation
-- bind to the sync engine
+c list UI
+  c key navigation
+- local storage backend
+  - import / export
++ bind to the sync engine
+  + bootstrap the integration 
+  - new JSON merge source
+  - client side google auth 
 - left menu with task lists
 - Navigation mode
+  - search as you type
   - SPECIAL+N to switch
   - ESC to quit
-  - search as you type
-  - left back
-  - right enter
-  - list of task lists on the task list
+  - dir-linke navi for /list/task
+    - left back
+    - right enter
+  - list of task lists on the task list (yes...)
 - MC mode
   - second panel
   - move function
