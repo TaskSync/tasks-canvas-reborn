@@ -1,7 +1,6 @@
 import Checkbox from "@material-ui/core/es/Checkbox";
 import List from "@material-ui/core/es/List";
 import ListItem from "@material-ui/core/es/ListItem";
-import ListItemIcon from "@material-ui/core/es/ListItemIcon";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/es/styles";
 import ArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import classnames from "classnames";
@@ -10,8 +9,7 @@ import React, {
   MouseEvent,
   FocusEvent,
   useState,
-  useReducer,
-  createRef
+  useReducer
 } from "react";
 import ReactDOM from "react-dom";
 import uniqid from "uniqid";
@@ -46,7 +44,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     text: {
       width: "100%",
-      outline: "0px solid transparent"
+      outline: "0px solid transparent",
+      "padding-left": "0.2em"
       // TODO no line breaks
     },
     arrow: {
@@ -70,8 +69,12 @@ const tasks: TTask[] = [
   { id: "id-3", text: "test 4" }
 ];
 
-type Action = { type: "update"; task: TTask } | { type: "indent"; id: string };
-function tasksReducer(state: TTask[], action: Action) {
+type TAction =
+  | { type: "update"; task: TTask }
+  | { type: "indent"; id: string }
+  | { type: "break"; id: string; pos: number };
+
+function tasksReducer(state: TTask[], action: TAction) {
   switch (action.type) {
     case "update":
       const task = state.find(task => task.id === action.task.id);
@@ -81,6 +84,10 @@ function tasksReducer(state: TTask[], action: Action) {
     case "indent":
       // TODO
       console.log(`indent ${action.id}`);
+      return [...state];
+    case "break":
+      // TODO
+      console.log(`break ${action.id}`);
       return [...state];
   }
 }
@@ -115,9 +122,12 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
         event.preventDefault();
       } else if (event.key === "Tab") {
         // indent
-        // TODO indent the task
         event.preventDefault();
         dispatchList({ type: "indent", id });
+      } else if (event.key === "Enter") {
+        // break a task into two (or start a new one)
+        event.preventDefault();
+        dispatchList({ type: "break", id });
       }
     };
   }
@@ -162,18 +172,16 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
             onKeyDown={handleKey(id)}
             selected={id === focusedID}
           >
-            <ListItemIcon>
-              {/*TODO fix the array children error */}
-              <ArrowDownIcon className={classes.arrow} />
-              <Checkbox
-                className={classes.checkbox}
-                edge="start"
-                checked={checked.includes(id)}
-                tabIndex={-1}
-                disableRipple
-                inputProps={{ "aria-labelledby": labelId }}
-              />
-            </ListItemIcon>
+            {/*TODO fix the array children error */}
+            <ArrowDownIcon className={classes.arrow} />
+            <Checkbox
+              className={classes.checkbox}
+              edge="start"
+              checked={checked.includes(id)}
+              tabIndex={-1}
+              disableRipple
+              inputProps={{ "aria-labelledby": labelId }}
+            />
             <span
               onBlur={handleBlur(id)}
               id={domID}
