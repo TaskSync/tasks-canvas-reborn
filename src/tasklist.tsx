@@ -11,37 +11,31 @@ import React, {
   useReducer
 } from "react";
 import uniqid from "uniqid";
-import useStyles from './tasklist-css'
+import useStyles from "./tasklist-css";
+import * as ops from './tasklist-ops'
 
 export type TTask = {
   id: string;
   text: string;
 };
 
-type TAction =
-  | { type: "update"; task: TTask }
-  | { type: "indent"; id: string }
-  | { type: "break"; id: string; pos: number };
+type TActionBase = {
+  store: {
+    get(): TTask[];
+    set(tasks: TTask[]);
+  };
+};
+
+export type TAction =
+  | { type: "update"; task: TTask } & TActionBase
+  | { type: "indent"; id: string } & TActionBase
+  | { type: "break"; id: string; pos: number } & TActionBase;
 
 function tasksReducer(state: TTask[], action: TAction) {
-  switch (action.type) {
-    case "update":
-      const task = state.find(task => task.id === action.task.id);
-      task.text = action.task.text;
-      console.log(`updated ${action.task.id} with`, task.text);
-      return [...state];
-    case "indent":
-      // TODO
-      console.log(`indent ${action.id}`);
-      return [...state];
-    case "break":
-      // TODO
-      console.log(`break ${action.id}`);
-      return [...state];
-  }
+  return ops[action.type]
 }
 
-export default function TaskList({ tasks }: { tasks: TTask[] }) {
+export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
   const classes = useStyles({});
   const [checked, setChecked] = useState([]);
   const [focusedID, setFocusedID] = useState(null);
@@ -72,11 +66,11 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
       } else if (event.key === "Tab") {
         // indent
         event.preventDefault();
-        dispatchList({ type: "indent", id });
+        dispatchList({ type: "indent", id, store });
       } else if (event.key === "Enter") {
         // break a task into two (or start a new one)
         event.preventDefault();
-        dispatchList({ type: "break", id });
+        dispatchList({ type: "break", id, store });
       }
     };
   }
@@ -94,7 +88,7 @@ export default function TaskList({ tasks }: { tasks: TTask[] }) {
     return (event: FocusEvent<HTMLSpanElement>) => {
       const task = getTaskByID(id);
       task.text = event.target.textContent;
-      dispatchList({ type: "update", task });
+      dispatchList({ type: "update", task, store });
     };
   }
 
