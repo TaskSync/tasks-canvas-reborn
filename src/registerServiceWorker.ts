@@ -9,13 +9,12 @@
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
 
-import { runInAction } from 'mobx';
-import RootStore from './stores/root';
+import { runInAction } from "mobx";
 
 const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
+  window.location.hostname === "localhost" ||
     // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
+    window.location.hostname === "[::1]" ||
     // 127.0.0.1/8 is considered localhost for IPv4.
     window.location.hostname.match(
       /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
@@ -24,8 +23,8 @@ const isLocalhost = Boolean(
 
 export function register(store: RootStore) {
   if (
-    process.env.NODE_ENV !== 'production' ||
-    !('serviceWorker' in navigator)
+    process.env.NODE_ENV !== "production" ||
+    !("serviceWorker" in navigator)
   ) {
     return;
   }
@@ -41,7 +40,7 @@ export function register(store: RootStore) {
     return;
   }
 
-  window.addEventListener('load', () => {
+  window.addEventListener("load", () => {
     // const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
     const swUrl = `/service-worker.js`;
 
@@ -64,7 +63,7 @@ async function registerValidSW(store: RootStore, swUrl: string) {
         return;
       }
       installingWorker.onstatechange = () => {
-        if (installingWorker.state !== 'installed') {
+        if (installingWorker.state !== "installed") {
           return;
         }
         if (navigator.serviceWorker.controller) {
@@ -75,17 +74,17 @@ async function registerValidSW(store: RootStore, swUrl: string) {
           runInAction(() => {
             store.updateAvailable = true;
           });
-          console.log('New content is available; please refresh.');
+          console.log("New content is available; please refresh.");
         } else {
           // At this point, everything has been precached.
           // It's the perfect time to display a
           // 'Content is cached for offline use.' message.
-          console.log('Content is cached for offline use.');
+          console.log("Content is cached for offline use.");
         }
       };
     };
   } catch (error) {
-    console.error('Error during service worker registration:', error);
+    console.error("Error during service worker registration:", error);
   }
 }
 
@@ -96,7 +95,7 @@ async function checkValidServiceWorker(store: RootStore, swUrl: string) {
     // Ensure service worker exists, and that we really are getting a JS file.
     if (
       response.status === 404 ||
-      response.headers.get('content-type')!.indexOf('javascript') === -1
+      response.headers.get("content-type")!.indexOf("javascript") === -1
     ) {
       // No service worker found. Probably a different app. Reload the page.
       const registration = await navigator.serviceWorker.ready;
@@ -108,13 +107,13 @@ async function checkValidServiceWorker(store: RootStore, swUrl: string) {
     }
   } catch {
     console.log(
-      'No internet connection found. App is running in offline mode.'
+      "No internet connection found. App is running in offline mode."
     );
   }
 }
 
 export function unregister() {
-  if ('serviceWorker' in navigator) {
+  if ("serviceWorker" in navigator) {
     navigator.serviceWorker.ready.then(registration => {
       registration.unregister();
     });

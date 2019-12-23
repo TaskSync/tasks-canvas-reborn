@@ -1,27 +1,13 @@
-/// <reference path="utils/missing.d.ts"/>
-import { Provider } from 'mobx-react';
-import { startRouter } from 'mobx-router-rise';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import config from './config.json';
-import App from './containers/App';
-import './polyfills';
-import * as routes from './routes';
-import { TConfig, TStores } from './stores';
-import RootStore from './stores/root';
+import TaskList, { TTask } from "./tasklist";
+import ReactDOM from "react-dom";
 
-const store = new RootStore((config as any) as TConfig);
-startRouter(routes, store, { strict: false });
+const tasks: TTask[] = [
+  { id: "id-0", text: "test 1" },
+  { id: "id-1", text: "test 2" },
+  { id: "id-2", text: "test 3" },
+  { id: "id-3", text: "test 4" }
+];
 
-const stores: TStores = {
-  store,
-  routerStore: store.router,
-};
-
-const root = (
-  <Provider {...stores}>
-    <App />
-  </Provider>
-);
-
-ReactDOM.render(root, document.getElementById('root') as HTMLElement);
+document.addEventListener("DOMContentLoaded", () => {
+  ReactDOM.render(<TaskList tasks={tasks} />, document.body as HTMLElement);
+});
