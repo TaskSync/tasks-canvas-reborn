@@ -3,7 +3,7 @@ c list UI
 - local storage backend
   - import / export
 + bind to the sync engine
-  + bootstrap the integration 
+  + bootstrap the integration
   - new JSON merge source
   - client side google auth 
 - left menu with task lists
