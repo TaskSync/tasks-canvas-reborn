@@ -11,7 +11,7 @@ const tasks: TTask[] = [
 const store = {
   set(tasks) {
     localStorage.setItem('tasks', tasks)
-  }
+  },
   get() {
     return localStorage.getItem('tasks')
   }

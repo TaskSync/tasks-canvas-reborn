@@ -13,26 +13,15 @@ import React, {
 import uniqid from "uniqid";
 import useStyles from "./tasklist-css";
 import * as ops from './tasklist-ops'
+import { TAction } from "./tasklist-ops";
 
 export type TTask = {
   id: string;
   text: string;
 };
 
-type TActionBase = {
-  store: {
-    get(): TTask[];
-    set(tasks: TTask[]);
-  };
-};
-
-export type TAction =
-  | { type: "update"; task: TTask } & TActionBase
-  | { type: "indent"; id: string } & TActionBase
-  | { type: "break"; id: string; pos: number } & TActionBase;
-
 function tasksReducer(state: TTask[], action: TAction) {
-  return ops[action.type]
+  return ops[action.type](state, action)
 }
 
 export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
@@ -70,7 +59,7 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
       } else if (event.key === "Enter") {
         // break a task into two (or start a new one)
         event.preventDefault();
-        dispatchList({ type: "break", id, store });
+        dispatchList({ type: "newline", id, store });
       }
     };
   }
@@ -115,7 +104,6 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
             onKeyDown={handleKey(id)}
             selected={id === focusedID}
           >
-            {/*TODO fix the array children error */}
             <ArrowDownIcon className={classes.arrow} />
             <Checkbox
               className={classes.checkbox}
