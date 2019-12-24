@@ -2,6 +2,7 @@ c list UI
   c key navigation
 - local storage backend
   - import / export
++ work on localstorage
 + bind to the sync engine
   + bootstrap the integration
   - new JSON merge source
