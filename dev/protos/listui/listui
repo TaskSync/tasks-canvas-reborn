@@ -3,4 +3,4 @@
 # TODO fix
 echo "!!! Run from the project root"
 
-npx parcel dev/protos/listui.html
+npx parcel dev/protos/listui/listui.html
