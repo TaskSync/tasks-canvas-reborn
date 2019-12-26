@@ -3,10 +3,10 @@ import ReactDOM from "react-dom";
 import React from "react";
 
 const tasks: TTask[] = [
-  { id: "id-0", text: "test 1" },
-  { id: "id-1", text: "test 2" },
-  { id: "id-2", text: "test 3" },
-  { id: "id-3", text: "test 4" }
+  { id: "id-0", title: "test 1", updated: { canvas: Date.now() } },
+  { id: "id-1", title: "test 2", updated: { canvas: Date.now() } },
+  { id: "id-2", title: "test 3", updated: { canvas: Date.now() } },
+  { id: "id-3", title: "test 4", updated: { canvas: Date.now() } }
 ];
 
 const store = {
@@ -20,7 +20,7 @@ const store = {
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={tasks} />,
+    <TaskList tasks={tasks} store={store} />,
     document.body as HTMLElement
   );
 });

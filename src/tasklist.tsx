@@ -8,37 +8,49 @@ import React, {
   KeyboardEvent,
   MouseEvent,
   useReducer,
-  useState
+  useState,
+  useEffect
 } from "react";
 import uniqid from "uniqid";
 import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
-import { TAction } from "./tasklist-ops"; 
+import { TAction } from "./tasklist-ops";
+import { getCaretPosition } from "./utils";
 
+export type TTaskID = string;
 export interface TTask {
-  id: DBRecordID
-  title: string
-  content: string
+  id: TTaskID;
+  title: string;
+  content?: string;
+  parentID?: TTaskID;
   updated: {
     // must be timestamp (miliseconds)
-    canvas: number | null
-  }
+    canvas: number | null;
+  };
 }
 
 function tasksReducer(state: TTask[], action: TAction) {
+  // TODO type
   return ops[action.type](state, action);
 }
 
-export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
+export default function TaskList({
+  tasks,
+  store
+}: {
+  tasks: TTask[];
+  store: any;
+}) {
   const classes = useStyles({});
   const [checked, setChecked] = useState([]);
   const [focusedID, setFocusedID] = useState(null);
+  const [focusPostponedIndex, setFocusPostponedIndex] = useState(null);
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
+  let focusedNode;
 
   function getTaskByID(id: string): TTask {
     return list.find(task => task.id === id);
   }
-
   // TODO delegate
   function handleKey(id: string, event: KeyboardEvent<HTMLElement>) {
     const task = getTaskByID(id);
@@ -63,9 +75,13 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
     } else if (event.key === "Enter") {
       // break a task into two (or start a new one)
       event.preventDefault();
-      debugger;
-      // TODO pos from event
-      dispatchList({ type: "newline", id, store });
+      dispatchList({
+        type: "newline",
+        id,
+        store,
+        pos: getCaretPosition(event.target)
+      });
+      setFocusPostponedIndex(list.indexOf(getTaskByID(id)) + 1);
     }
   }
 
@@ -78,14 +94,22 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
   // TODO delegate
   function handleBlur(id: string, event: FocusEvent<HTMLSpanElement>) {
     const task = getTaskByID(id);
-    task.text = event.target.textContent;
+    task.title = event.target.textContent;
     dispatchList({ type: "update", task, store });
   }
 
+  useEffect(() => {
+    if (!focusedNode) {
+      console.log("no focusedNode");
+      return;
+    }
+    focusedNode.focus();
+  });
+
   return (
     <List className={classes.list}>
-      {list.map(task => {
-        const { id, text } = task;
+      {list.map((task, index) => {
+        const { id, title } = task;
         const labelId = `checkbox-list-label-${id}`;
         const isSelected = id === focusedID;
         const domID = uniqid();
@@ -103,7 +127,6 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
             button
             onClick={handleClick.bind(null, id)}
             onKeyDown={handleKey.bind(null, id)}
-            selected={id === focusedID}
           >
             <ArrowDownIcon className={classes.arrow} />
             <Checkbox
@@ -120,8 +143,15 @@ export default function TaskList({ tasks, store }: { tasks: TTask[] }) {
               contentEditable={true}
               suppressContentEditableWarning={true}
               className={classes.text}
+              ref={node => {
+                if (focusPostponedIndex && index == focusPostponedIndex) {
+                  focusedNode = node;
+                } else if (id === focusedID) {
+                  focusedNode = node;
+                }
+              }}
             >
-              {text}
+              {title}
             </span>
           </ListItem>
         );

@@ -1,3 +1,4 @@
+import uniqid from "uniqid";
 import { TTask } from "./tasklist";
 
 // types
@@ -17,26 +18,43 @@ type TActionBase = {
   };
 };
 
+// TODO update the timestamp
+
 export function update(state: TTask[], action: TUpdate) {
   const task = state.find(task => task.id === action.task.id);
-  task.text = action.task.text;
-  console.log(`updated ${action.task.id} with`, task.text);
+  task.title = action.task.title;
+  console.log(`updated ${action.task.id} with`, task.title);
   return [...state];
 }
 
 export function indent(state: TTask[], action: TIndent) {
-  // TODO
+  const task = state.find(task => task.id === action.id);
+  const index = state.indexOf(task);
+  if (index < 1) {
+    return state;
+  }
+  task.parentID = state[index - 1].id;
   console.log(`indent ${action.id}`);
   return [...state];
 }
 
 export function newline(state: TTask[], action: TNewline) {
-  // TODO
-  console.log(`newline ${action.id}`);
-  return [...state];
+  const task = state.find(task => task.id === action.id);
+  const index = state.indexOf(task);
+  const task1Title = task.title.slice(0, action.pos);
+  const task2Title = task.title.slice(action.pos);
+
+  task.title = task1Title;
+  const task2: TTask = {
+    id: uniqid(),
+    title: task2Title,
+    updated: {
+      canvas: Date.now()
+    }
+  };
+  return [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
 }
 
 // types
 
 export type TAction = TUpdate | TNewline | TIndent;
- 
