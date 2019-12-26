@@ -20,7 +20,7 @@ const store = {
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={tasks} store={store} />,
+    <TaskList tasks={tasks} />,
     document.body as HTMLElement
   );
 });
