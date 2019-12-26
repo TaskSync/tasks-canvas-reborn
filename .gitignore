@@ -1,10 +1,4 @@
 node_modules
 .cache
-.idea/.gitignore
-.idea/$CACHE_FILE$
-.idea/encodings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/tasks-canvas-reborn.iml
-.idea/vcs.xml
+.idea/*
 dist/*
