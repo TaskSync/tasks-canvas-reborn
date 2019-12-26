@@ -1,3 +1,4 @@
+Milestone 1:
 c list UI
   c key navigation
 + local storage backend
@@ -9,14 +10,14 @@ c list UI
   - new JSON merge source
   - client side google auth 
 - left menu with task lists
-- Navigation mode
+
+Milestone 2:
+- Navigation mode (modal)
   - search as you type
   - SPECIAL+N to switch
   - ESC to quit
-  - dir-linke navi for /list/task
-    - left back
-    - right enter
   - list of task lists on the task list (yes...)
 - MC mode
+  - dir-like navi as /list/task
   - second panel
   - move function

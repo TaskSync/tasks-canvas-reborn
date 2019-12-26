@@ -16,14 +16,19 @@ const tasks: TTask[] = [
 
 const store = {
   set(tasks) {
-    localStorage.setItem("tasks", tasks);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   },
   get() {
-    return localStorage.getItem("tasks");
+    return JSON.parse(localStorage.getItem("tasks"));
   }
 };
 
-const cached = store.get() && JSON.parse(store.get())
+let cached: TTask[];
+try {
+  cached = store.get();
+} catch {
+  // nothing
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(

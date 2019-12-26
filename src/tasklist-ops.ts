@@ -30,7 +30,9 @@ export function update(state: TTask[], action: TUpdate) {
   const task = state.find(task => task.id === action.task.id);
   task.title = action.task.title;
   console.log(`updated ${action.task.id} with`, task.title);
-  return [...state];
+  const ret = [...state];
+  action.store.set(ret);
+  return ret;
 }
 
 export function indent(state: TTask[], action: TIndent) {
@@ -41,14 +43,18 @@ export function indent(state: TTask[], action: TIndent) {
   }
   task.parentID = state[index - 1].id;
   console.log(`indent ${action.id}`);
-  return [...state];
+  const ret = [...state];
+  action.store.set(ret);
+  return ret;
 }
 
 export function unindent(state: TTask[], action: TIndent) {
   const task = state.find(task => task.id === action.id);
-  task.parentID = null
+  task.parentID = null;
   console.log(`unindent ${action.id}`);
-  return [...state];
+  const ret = [...state];
+  action.store.set(ret);
+  return ret;
 }
 
 export function newline(state: TTask[], action: TNewline) {
@@ -65,13 +71,17 @@ export function newline(state: TTask[], action: TNewline) {
       canvas: Date.now()
     }
   };
-  return [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
+  const ret = [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
+  action.store.set(ret);
+  return ret;
 }
 
 export function completed(state: TTask[], action: TCompleted) {
   const task = state.find(task => task.id === action.id);
   task.isCompleted = action.completed;
-  return [...state];
+  const ret = [...state];
+  action.store.set(ret);
+  return ret;
 }
 
 // types
