@@ -5,6 +5,7 @@ import { TTask } from "./tasklist";
 
 export type TUpdate = { type: "update"; task: TTask } & TActionBase;
 export type TIndent = { type: "indent"; id: string } & TActionBase;
+export type TUnIndent = { type: "unindent"; id: string } & TActionBase;
 export type TCompleted = {
   type: "completed";
   id: string;
@@ -43,6 +44,13 @@ export function indent(state: TTask[], action: TIndent) {
   return [...state];
 }
 
+export function unindent(state: TTask[], action: TIndent) {
+  const task = state.find(task => task.id === action.id);
+  task.parentID = null
+  console.log(`unindent ${action.id}`);
+  return [...state];
+}
+
 export function newline(state: TTask[], action: TNewline) {
   const task = state.find(task => task.id === action.id);
   const index = state.indexOf(task);
@@ -68,4 +76,4 @@ export function completed(state: TTask[], action: TCompleted) {
 
 // types
 
-export type TAction = TUpdate | TNewline | TIndent | TCompleted;
+export type TAction = TUpdate | TNewline | TIndent | TCompleted | TUnIndent;

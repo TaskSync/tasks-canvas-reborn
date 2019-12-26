@@ -5,7 +5,7 @@ export default makeStyles((theme: Theme) =>
     list: {
       width: "100%",
       backgroundColor: "white",
-      padding: 0
+      padding: "0 0.3em"
     },
     item: {
       height: "1.3em",
@@ -37,6 +37,9 @@ export default makeStyles((theme: Theme) =>
     },
     checkbox: {
       padding: 0
+    },
+    indent: {
+      "padding-left": "1.5em"
     }
   })
 );

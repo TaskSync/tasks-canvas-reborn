@@ -73,7 +73,9 @@ export default function TaskList({
     } else if (event.key === "Tab") {
       // indent
       event.preventDefault();
-      dispatchList({ type: "indent", id, store });
+      const type = event.shiftKey ? 'unindent' : 'indent'
+      // TODO struct typing
+      dispatchList({ type, id, store });
     } else if (event.key === "Enter") {
       // break a task into two (or start a new one)
       event.preventDefault();
@@ -130,7 +132,8 @@ export default function TaskList({
             disableRipple
             className={classnames(
               classes.item,
-              isSelected ? classes.selected : null
+              isSelected ? classes.selected : null,
+              task.parentID ? classes.indent : null
             )}
             key={id}
             role={undefined}
@@ -139,7 +142,6 @@ export default function TaskList({
             onClick={handleClick.bind(null, id)}
             onKeyDown={handleKey.bind(null, id)}
           >
-            <ArrowDownIcon className={classes.arrow} />
             <Checkbox
               checked={task.isCompleted}
               className={classes.checkbox}
