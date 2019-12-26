@@ -27,6 +27,7 @@ export interface TTask {
     // must be timestamp (miliseconds)
     canvas: number | null;
   };
+  isCompleted?: boolean;
 }
 
 function tasksReducer(state: TTask[], action: TAction) {
@@ -42,9 +43,9 @@ export default function TaskList({
   store: any;
 }) {
   const classes = useStyles({});
-  const [checked, setChecked] = useState([]);
   const [focusedID, setFocusedID] = useState(null);
   const [focusPostponedIndex, setFocusPostponedIndex] = useState(null);
+  // const [focusedCaretPos, setFocusedCaretPos] = useState(null);
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
   let focusedNode;
 
@@ -66,6 +67,7 @@ export default function TaskList({
         // move up
         indexChanged = Math.max(index - 1, 0);
       }
+      // setFocusedCaretPos(getCaretPosition(event.target));
       setFocusedID(list[indexChanged].id);
       event.preventDefault();
     } else if (event.key === "Tab") {
@@ -87,6 +89,15 @@ export default function TaskList({
 
   // TODO delegate
   function handleClick(id: string, event: MouseEvent<HTMLElement>) {
+    const target = event.target as HTMLInputElement;
+    if (target?.tagName?.toLowerCase() === "input") {
+      dispatchList({
+        type: "completed",
+        id,
+        completed: target.checked,
+        store
+      });
+    }
     setFocusedID(id);
     event.preventDefault();
   }
@@ -130,9 +141,9 @@ export default function TaskList({
           >
             <ArrowDownIcon className={classes.arrow} />
             <Checkbox
+              checked={task.isCompleted}
               className={classes.checkbox}
               edge="start"
-              checked={checked.includes(id)}
               tabIndex={-1}
               disableRipple
               inputProps={{ "aria-labelledby": labelId }}

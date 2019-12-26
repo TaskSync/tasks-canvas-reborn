@@ -5,6 +5,11 @@ import { TTask } from "./tasklist";
 
 export type TUpdate = { type: "update"; task: TTask } & TActionBase;
 export type TIndent = { type: "indent"; id: string } & TActionBase;
+export type TCompleted = {
+  type: "completed";
+  id: string;
+  completed: boolean;
+} & TActionBase;
 export type TNewline = {
   type: "newline";
   id: string;
@@ -55,6 +60,12 @@ export function newline(state: TTask[], action: TNewline) {
   return [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
 }
 
+export function completed(state: TTask[], action: TCompleted) {
+  const task = state.find(task => task.id === action.id);
+  task.isCompleted = action.completed;
+  return [...state];
+}
+
 // types
 
-export type TAction = TUpdate | TNewline | TIndent;
+export type TAction = TUpdate | TNewline | TIndent | TCompleted;
