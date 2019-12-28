@@ -18,6 +18,11 @@ export type TNewline = {
   pos: number;
   setFocusedID(id: TTaskID): void;
 } & TActionBase;
+export type TMergePrevLine = {
+  type: "mergePrevLine";
+  id: string;
+  setFocusedID(id: TTaskID): void;
+} & TActionBase;
 
 type TActionBase = {
   store: Store;
@@ -56,6 +61,7 @@ export function unindent(state: TTask[], action: TUnIndent) {
   return ret;
 }
 
+// splits a task to two on Enter key
 export function newline(state: TTask[], action: TNewline) {
   const task = state.find(task => task.id === action.id);
   const index = state.indexOf(task);
@@ -72,8 +78,34 @@ export function newline(state: TTask[], action: TNewline) {
     }
   };
   const ret = [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
+
   action.store.set(ret);
   action.setFocusedID(task2.id);
+  return ret;
+}
+
+// merges two tasks into one after Backspace on the line beginning
+export function mergePrevLine(state: TTask[], action: TNewline) {
+  debugger;
+  const taskToDelete = state.find(task => task.id === action.id);
+  const indexToDelete = state.indexOf(taskToDelete);
+  console.log(`mergePrevLine`, taskToDelete, indexToDelete);
+  // dont merge-up the first task
+  if (indexToDelete === 0) {
+    return state;
+  }
+  const previous = state[indexToDelete - 1];
+  previous.title += taskToDelete.title;
+  action.setFocusedID(previous.id);
+  // TODO support focus char
+  // action.setFocusChar(previous.title.length - 1)
+
+  const ret = [
+    ...state.slice(0, indexToDelete),
+    ...state.slice(indexToDelete + 1)
+  ];
+
+  action.store.set(ret);
   return ret;
 }
 
@@ -87,4 +119,10 @@ export function completed(state: TTask[], action: TCompleted) {
 
 // types
 
-export type TAction = TUpdate | TNewline | TIndent | TCompleted | TUnIndent;
+export type TAction =
+  | TUpdate
+  | TNewline
+  | TIndent
+  | TCompleted
+  | TUnIndent
+  | TMergePrevLine;

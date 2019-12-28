@@ -1,6 +1,7 @@
-import TaskList, { TTask, TTaskID } from "./tasklist";
-import ReactDOM from "react-dom";
+import { saveAs } from "file-saver";
 import React from "react";
+import ReactDOM from "react-dom";
+import TaskList, { TTask } from "./tasklist";
 
 const now = Date.now();
 
@@ -26,7 +27,9 @@ export class Store {
   }
 }
 
+const store = new Store();
 let cached: TTask[];
+
 try {
   cached = store.get();
 } catch {
@@ -35,7 +38,21 @@ try {
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={cached || tasks} store={new Store()} />,
+    <TaskList tasks={cached || tasks} store={store} />,
     document.body as HTMLElement
   );
 });
+
+// @ts-ignore
+window.canvasExport = () => {
+  const blob = new Blob([JSON.stringify(store.get())], {
+    type: "application/json"
+  });
+  const date = new Date();
+  saveAs(blob, "tasks-" + date.toISOString() + ".json");
+};
+
+// @ts-ignore
+window.canvasImport = () => {
+  // TODO use FileReader and an upload field
+};

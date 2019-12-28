@@ -86,7 +86,15 @@ export default function TaskList({
         pos: getCaretPosition(event.target),
         setFocusedID
       });
-      setFocusedID(null);
+    } else if (event.key === "Backspace") {
+      // merge with the task above
+      event.preventDefault();
+      dispatchList({
+        type: "mergePrevLine",
+        id,
+        store,
+        setFocusedID
+      });
     }
   }
 
