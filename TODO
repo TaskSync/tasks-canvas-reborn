@@ -3,8 +3,11 @@ c list UI
   c key navigation
 + local storage backend
   - support undo
-  - support sorting
+  - support sorting (eg by data)
   - import / export
+* moving tasks
+  - keyboard
+  - drag & drop
 + bind to the sync engine
   + bootstrap the integration
   - new JSON merge source

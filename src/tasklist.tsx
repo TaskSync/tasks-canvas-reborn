@@ -1,7 +1,6 @@
 import Checkbox from "@material-ui/core/es/Checkbox";
 import List from "@material-ui/core/es/List";
 import ListItem from "@material-ui/core/es/ListItem";
-import ArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import classnames from "classnames";
 import React, {
   FocusEvent,
@@ -12,6 +11,7 @@ import React, {
   useEffect
 } from "react";
 import uniqid from "uniqid";
+import { Store } from "./main";
 import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
 import { TAction } from "./tasklist-ops";
@@ -23,6 +23,7 @@ export interface TTask {
   title: string;
   content?: string;
   parentID?: TTaskID;
+  created: number
   updated: {
     // must be timestamp (miliseconds)
     canvas: number | null;
@@ -40,11 +41,11 @@ export default function TaskList({
   store
 }: {
   tasks: TTask[];
-  store: any;
+  store: Store;
 }) {
   const classes = useStyles({});
   const [focusedID, setFocusedID] = useState(null);
-  const [focusPostponedIndex, setFocusPostponedIndex] = useState(null);
+  // TODO honor the caret position (width based non-monospace fonts)
   // const [focusedCaretPos, setFocusedCaretPos] = useState(null);
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
   let focusedNode;
@@ -67,7 +68,6 @@ export default function TaskList({
         // move up
         indexChanged = Math.max(index - 1, 0);
       }
-      // setFocusedCaretPos(getCaretPosition(event.target));
       setFocusedID(list[indexChanged].id);
       event.preventDefault();
     } else if (event.key === "Tab") {
@@ -83,9 +83,10 @@ export default function TaskList({
         type: "newline",
         id,
         store,
-        pos: getCaretPosition(event.target)
+        pos: getCaretPosition(event.target),
+        setFocusedID
       });
-      setFocusPostponedIndex(list.indexOf(getTaskByID(id)) + 1);
+      setFocusedID(null);
     }
   }
 
@@ -113,7 +114,6 @@ export default function TaskList({
 
   useEffect(() => {
     if (!focusedNode) {
-      console.log("no focusedNode");
       return;
     }
     focusedNode.focus();
@@ -121,7 +121,7 @@ export default function TaskList({
 
   return (
     <List className={classes.list}>
-      {list.map((task, index) => {
+      {list.map((task) => {
         const { id, title } = task;
         const labelId = `checkbox-list-label-${id}`;
         const isSelected = id === focusedID;
@@ -157,9 +157,7 @@ export default function TaskList({
               suppressContentEditableWarning={true}
               className={classes.text}
               ref={node => {
-                if (focusPostponedIndex && index == focusPostponedIndex) {
-                  focusedNode = node;
-                } else if (id === focusedID) {
+                if (id === focusedID ) {
                   focusedNode = node;
                 }
               }}

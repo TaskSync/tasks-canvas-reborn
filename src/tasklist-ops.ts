@@ -1,5 +1,6 @@
 import uniqid from "uniqid";
-import { TTask } from "./tasklist";
+import { Store } from "./main";
+import { TTask, TTaskID } from "./tasklist";
 
 // types
 
@@ -15,13 +16,11 @@ export type TNewline = {
   type: "newline";
   id: string;
   pos: number;
+  setFocusedID(id: TTaskID): void;
 } & TActionBase;
 
 type TActionBase = {
-  store: {
-    get(): TTask[];
-    set(tasks: TTask[]);
-  };
+  store: Store;
 };
 
 // TODO update the timestamp
@@ -48,7 +47,7 @@ export function indent(state: TTask[], action: TIndent) {
   return ret;
 }
 
-export function unindent(state: TTask[], action: TIndent) {
+export function unindent(state: TTask[], action: TUnIndent) {
   const task = state.find(task => task.id === action.id);
   task.parentID = null;
   console.log(`unindent ${action.id}`);
@@ -67,12 +66,14 @@ export function newline(state: TTask[], action: TNewline) {
   const task2: TTask = {
     id: uniqid(),
     title: task2Title,
+    created: Date.now(),
     updated: {
       canvas: Date.now()
     }
   };
   const ret = [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
   action.store.set(ret);
+  action.setFocusedID(task2.id);
   return ret;
 }
 
