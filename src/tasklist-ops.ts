@@ -32,6 +32,9 @@ type TActionBase = {
 
 export function update(state: TTask[], action: TUpdate) {
   const task = state.find(task => task.id === action.task.id);
+  if (task.title === action.task.title) {
+    return state;
+  }
   task.title = action.task.title;
   console.log(`updated ${action.task.id} with`, task.title);
   const ret = [...state];
@@ -68,6 +71,7 @@ export function newline(state: TTask[], action: TNewline) {
   const task1Title = task.title.slice(0, action.pos);
   const task2Title = task.title.slice(action.pos);
 
+  console.log(`newline`, action.id);
   task.title = task1Title;
   const task2: TTask = {
     id: uniqid(),

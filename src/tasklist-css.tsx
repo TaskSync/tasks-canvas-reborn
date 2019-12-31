@@ -5,16 +5,24 @@ export default makeStyles((theme: Theme) =>
     list: {
       width: "100%",
       backgroundColor: "white",
-      padding: "0 0.3em"
+      padding: "0"
     },
     item: {
-      height: "1.3em",
-      padding: 0,
+      width: '50%',
       margin: "0.1em 0",
+    },
+    itemWrapper: {
+      transition: 'none',
+      padding: 0,
       "&:hover": {
         // TODO !important
         "background-color": "transparent !important"
-      }
+      },
+      // TODO doesnt work
+      // "&$focusVisible": {
+      //   // TODO !important
+      //   "background-color": "transparent !important"
+      // }
     },
     selected: {
       border: "1px solid yellow",
@@ -36,7 +44,9 @@ export default makeStyles((theme: Theme) =>
       "margin-right": "10px"
     },
     checkbox: {
-      padding: 0
+      padding: 0,
+      margin: 0,
+      'font-size': '1.2rem'
     },
     indent: {
       "padding-left": "1.5em"

@@ -1,3 +1,4 @@
+import { ListItemSecondaryAction } from "@material-ui/core";
 import Checkbox from "@material-ui/core/es/Checkbox";
 import List from "@material-ui/core/es/List";
 import ListItem from "@material-ui/core/es/ListItem";
@@ -16,6 +17,7 @@ import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
 import { TAction } from "./tasklist-ops";
 import { getCaretPosition } from "./utils";
+import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 
 export type TTaskID = string;
 export interface TTask {
@@ -135,22 +137,25 @@ export default function TaskList({
         const isSelected = id === focusedID;
         const domID = uniqid();
 
+        // TODO inline style
         return (
           <ListItem
             disableRipple
-            className={classnames(
-              classes.item,
-              isSelected ? classes.selected : null,
-              task.parentID ? classes.indent : null
-            )}
+            className={classes.itemWrapper}
             key={id}
             role={undefined}
             dense
             button
+            style={{backgroundColor: 'transparent'}}
             onClick={handleClick.bind(null, id)}
             onKeyDown={handleKey.bind(null, id)}
           >
-            <Checkbox
+            <div className={classnames(
+              classes.item,
+              isSelected ? classes.selected : null,
+              task.parentID ? classes.indent : null
+            )}>
+              <Checkbox
               checked={task.isCompleted}
               className={classes.checkbox}
               edge="start"
@@ -172,6 +177,12 @@ export default function TaskList({
             >
               {title}
             </span>
+            <ListItemSecondaryAction className={classes.arrowWrapper}>
+              <ArrowRightIcon className={classes.arrow} />
+            </ListItemSecondaryAction>
+
+            </div>
+
           </ListItem>
         );
       })}
