@@ -31,7 +31,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   const [initialized, setInitialized] = useState(false);
   if (!initialized) {
-    store.addRev(list)
+    store.addRev(list);
     setInitialized(true);
   }
 
@@ -62,6 +62,17 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const id = getDataID(event);
     const task = getTaskByID(id);
 
+    // always save text before performing other action
+    function saveText() {
+      dispatchList({
+        type: "update",
+        store,
+        id,
+        // @ts-ignore
+        title: event.target.textContent || ""
+      });
+    }
+
     const undoPressed =
       String.fromCharCode(event.keyCode).toLowerCase() === "z" &&
       event.altKey &&
@@ -90,6 +101,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     } else if (event.key === "Tab") {
       // indent
       event.preventDefault();
+      saveText();
       if (event.shiftKey) {
         dispatchList({ type: "unindent", id, store });
       } else {
@@ -99,11 +111,12 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     } else if (event.key === "Enter") {
       // break a task into two (or start a new one)
       event.preventDefault();
+      saveText();
       dispatchList({
         type: "newline",
         id,
         store,
-        pos: getCaretPosition(event.target),
+        pos: getCaretPosition(event.target as HTMLElement),
         setFocusedID
       });
       resetUndo();
@@ -111,7 +124,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       event.key === "Backspace" &&
       // @ts-ignore
       event.target.isContentEditable &&
-      getCaretPosition(event.target) === 0
+      getCaretPosition(event.target as HTMLElement) === 0
     ) {
       // merge with the task above
       event.preventDefault();
@@ -125,6 +138,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     } else if (undoPressed) {
       setDuringUndo(true);
       event.preventDefault();
+      // TODO save text and if changed, double undo
       dispatchList({ type: "undo", store });
     } else if (redoPressed) {
       setDuringUndo(true);
@@ -162,6 +176,12 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const id = getDataID(event);
     const target = event.target as HTMLInputElement;
     if (target?.tagName?.toLowerCase() === "input") {
+      dispatchList({
+        type: "update",
+        store,
+        id,
+        title: target.textContent || ""
+      });
       dispatchList({
         type: "completed",
         id,
