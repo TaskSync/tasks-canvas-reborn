@@ -1,6 +1,7 @@
 import uniqid from "uniqid";
 import { Store } from "./main";
 import { TTask, TTaskID } from "./tasklist";
+import { map } from "lodash-es";
 
 // types
 
@@ -73,6 +74,7 @@ export function newline(state: TTask[], action: TNewline) {
 
   console.log(`newline`, action.id);
   task.title = task1Title;
+  // TODO extract the factory
   const task2: TTask = {
     id: uniqid(),
     title: task2Title,
@@ -81,6 +83,7 @@ export function newline(state: TTask[], action: TNewline) {
       canvas: Date.now()
     }
   };
+  // TODO set previous to the next task
   const ret = [...state.slice(0, index + 1), task2, ...state.slice(index + 1)];
 
   action.store.set(ret);
@@ -119,6 +122,12 @@ export function completed(state: TTask[], action: TCompleted) {
   const ret = [...state];
   action.store.set(ret);
   return ret;
+}
+
+export function sort(tasks: TTask[], order: "created" | "updated" | "user") {}
+
+export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
+  return tasks.filter(t => t.parentID === id);
 }
 
 // types

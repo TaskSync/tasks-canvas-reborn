@@ -2,21 +2,7 @@ import { saveAs } from "file-saver";
 import React from "react";
 import ReactDOM from "react-dom";
 import TaskList, { TTask } from "./tasklist";
-
-const now = Date.now();
-
-const tasks: TTask[] = [
-  { id: "id-0", title: "test 1", updated: { canvas: now }, created: now },
-  {
-    id: "id-1",
-    parentID: "id-0",
-    title: "test 2",
-    updated: { canvas: now },
-    created: now
-  },
-  { id: "id-2", title: "test 3", updated: { canvas: now }, created: now },
-  { id: "id-3", title: "test 4", updated: { canvas: now }, created: now }
-];
+import defaultTasks from "./mock";
 
 export class Store {
   set(tasks) {
@@ -38,11 +24,12 @@ try {
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={cached || tasks} store={store} />,
+    <TaskList tasks={cached || defaultTasks} store={store} />,
     document.body as HTMLElement
   );
 });
 
+// TODO extract
 // @ts-ignore
 window.canvasExport = () => {
   const blob = new Blob([JSON.stringify(store.get())], {
@@ -54,5 +41,6 @@ window.canvasExport = () => {
 
 // @ts-ignore
 window.canvasImport = () => {
-  // TODO use FileReader and an upload field
+  // TODO 1 allow calling form the console with a JSON
+  // TODO 2 use FileReader and an upload field
 };

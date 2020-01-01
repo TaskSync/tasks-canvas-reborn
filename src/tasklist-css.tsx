@@ -2,51 +2,50 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/es/styles";
 
 export default makeStyles((theme: Theme) =>
   createStyles({
-    list: {
+    table: {
       width: "100%",
       backgroundColor: "white",
-      padding: "0"
+      padding: "0",
+      "border-spacing": "0"
     },
-    item: {
-      width: '50%',
-      margin: "0.1em 0",
+    row: {
+      padding: 0
     },
-    itemWrapper: {
-      transition: 'none',
-      padding: 0,
-      "&:hover": {
-        // TODO !important
-        "background-color": "transparent !important"
-      },
-      // TODO doesnt work
-      // "&$focusVisible": {
-      //   // TODO !important
-      //   "background-color": "transparent !important"
-      // }
-    },
-    selected: {
-      border: "1px solid yellow",
+    cell: {
+      border: "1px solid transparent",
       "border-width": "1px 0",
-      // TODO !important
-      "background-color": "#fffff7 !important",
-      "&:hover": {
-        // TODO !important
-        "background-color": "#fffff7 !important"
-      }
+      "vertical-align": "top"
     },
-    text: {
+    textCell: {
+      position: "relative",
+      'padding-right': '1.5em'
+    },
+    selectedCell: {
+      border: "1px solid #ece85b",
+      "border-width": "1px 0",
+      "background-color": "#fefedd"
+    },
+    title: {
       width: "100%",
       outline: "0px solid transparent",
       "padding-left": "0.2em"
       // TODO no line breaks
     },
-    arrow: {
-      "margin-right": "10px"
+    contentCell: {
+      width: "30%",
+      color: "gray",
+      padding: '0 0.5em'
     },
+    arrow: {
+      position: "absolute",
+      right: 0,
+      top: 0,
+    },
+    checkboxCell: {},
     checkbox: {
       padding: 0,
       margin: 0,
-      'font-size': '1.2rem'
+      "font-size": "1.2rem"
     },
     indent: {
       "padding-left": "1.5em"
