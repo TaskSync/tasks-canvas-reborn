@@ -1,5 +1,5 @@
 import Checkbox from "@material-ui/core/es/Checkbox";
-import ArrowRightIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import classnames from "classnames";
 import React from "react";
 import { TTask, TTaskID } from "./store";
@@ -12,7 +12,7 @@ function Task({
 }: {
   task: TTask;
   focusedID: TTaskID;
-  setFocusedNode: (HTMLElement) => void;
+  setFocusedNode: (node: HTMLElement) => void;
 }) {
   const classes = useStyles({});
   const { id, title } = task;
@@ -52,14 +52,14 @@ function Task({
           isSelected ? classes.selectedCell : null
         )}
       >
-        <ArrowRightIcon className={classes.arrow} />
+        {isSelected ? <ArrowRightIcon className={classes.arrow} /> : null}
         <span
           contentEditable={true}
           suppressContentEditableWarning={true}
           className={classes.title}
           ref={node => {
             if (id === focusedID) {
-              setFocusedNode(node);
+              setFocusedNode(node!);
             }
           }}
         >
