@@ -1,4 +1,4 @@
-import { TTask } from "./tasklist";
+import { TTask } from "./store";
 
 const now = Date.now();
 

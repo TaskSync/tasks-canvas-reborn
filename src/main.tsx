@@ -1,17 +1,9 @@
 import { saveAs } from "file-saver";
 import React from "react";
 import ReactDOM from "react-dom";
-import TaskList, { TTask } from "./tasklist";
+import TaskList from "./tasklist";
 import defaultTasks from "./mock";
-
-export class Store {
-  set(tasks) {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
-  get() {
-    return JSON.parse(localStorage.getItem("tasks"));
-  }
-}
+import Store, { TTask } from "./store";
 
 const store = new Store();
 let cached: TTask[];

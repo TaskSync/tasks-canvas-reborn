@@ -1,6 +1,3 @@
-import Checkbox from "@material-ui/core/es/Checkbox";
-import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
-import classnames from "classnames";
 import React, {
   FocusEvent,
   KeyboardEvent,
@@ -11,57 +8,71 @@ import React, {
   SyntheticEvent,
   Fragment
 } from "react";
-import { Store } from "./main";
+import { Store, TTask, TTaskID } from "./store";
+import Task from "./task";
 import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
 import { TAction, getChildren } from "./tasklist-ops";
-import { getCaretPosition } from "./utils";
-
-export type TTaskID = string;
-export interface TTask {
-  id: TTaskID;
-  title: string;
-  content?: string;
-  parentID?: TTaskID;
-  created: number;
-  updated: {
-    // must be timestamp (miliseconds)
-    canvas: number | null;
-  };
-  isCompleted?: boolean;
-}
+import { getCaretPosition, isALetter } from "./utils";
+import assert from "assert";
 
 function tasksReducer(state: TTask[], action: TAction) {
   // @ts-ignore TODO type
   return ops[action.type](state, action);
 }
 
-export default function TaskList({
-  tasks,
-  store
-}: {
-  tasks: TTask[];
-  store: Store;
-}) {
+function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
-  const rootTasks = list.filter(t => t.parentID === undefined);
+  const rootTasks = list.filter((t: TTask) => t.parentID === undefined);
 
-  const [focusedID, setFocusedID] = useState(null);
-  let focusedNode;
+  // TODO generate the first empty record if length === 0
+  assert(list[0].id);
+
+  const [initialized, setInitialized] = useState(false);
+  if (!initialized) {
+    store.addRev(list)
+    setInitialized(true);
+  }
+
+  // counts the chars typed / deleted per task since the last undo snapshot
+  const [charsSinceUndo, setCharsSinceUndo] = useState<number>(0);
+  const [undoTimer, setUndoTimer] = useState<number | undefined>(undefined);
+  const [duringUndo, setDuringUndo] = useState<boolean>(false);
+
+  const [focusedID, setFocusedID] = useState<string>(list[0].id);
+  let focusedNode: HTMLSpanElement | undefined;
   function setFocusedNode(node: HTMLSpanElement) {
     focusedNode = node;
   }
 
-  store.set(list);
-
   function getTaskByID(id: string): TTask {
-    return list.find(task => task.id === id);
+    return list.find((task: TTask) => task.id === id);
+  }
+
+  function resetUndo() {
+    setCharsSinceUndo(0);
+    if (undoTimer !== undefined) {
+      clearTimeout(undoTimer);
+    }
+    setUndoTimer(undefined);
   }
 
   function handleKey(event: KeyboardEvent<HTMLElement>) {
     const id = getDataID(event);
     const task = getTaskByID(id);
+
+    const undoPressed =
+      String.fromCharCode(event.keyCode).toLowerCase() === "z" &&
+      event.altKey &&
+      !event.shiftKey &&
+      !event.metaKey;
+    const redoPressed =
+      String.fromCharCode(event.keyCode).toLowerCase() === "z" &&
+      event.altKey &&
+      event.shiftKey &&
+      !event.metaKey;
+
     if (["ArrowDown", "ArrowUp"].includes(event.key)) {
       const index = list.indexOf(task);
       let indexChanged;
@@ -75,6 +86,7 @@ export default function TaskList({
       }
       setFocusedID(list[indexChanged].id);
       event.preventDefault();
+      resetUndo();
     } else if (event.key === "Tab") {
       // indent
       event.preventDefault();
@@ -83,6 +95,7 @@ export default function TaskList({
       } else {
         dispatchList({ type: "indent", id, store });
       }
+      resetUndo();
     } else if (event.key === "Enter") {
       // break a task into two (or start a new one)
       event.preventDefault();
@@ -93,7 +106,13 @@ export default function TaskList({
         pos: getCaretPosition(event.target),
         setFocusedID
       });
-    } else if (event.key === "Backspace") {
+      resetUndo();
+    } else if (
+      event.key === "Backspace" &&
+      // @ts-ignore
+      event.target.isContentEditable &&
+      getCaretPosition(event.target) === 0
+    ) {
       // merge with the task above
       event.preventDefault();
       dispatchList({
@@ -102,6 +121,40 @@ export default function TaskList({
         store,
         setFocusedID
       });
+      resetUndo();
+    } else if (undoPressed) {
+      setDuringUndo(true);
+      event.preventDefault();
+      dispatchList({ type: "undo", store });
+    } else if (redoPressed) {
+      setDuringUndo(true);
+      event.preventDefault();
+      dispatchList({ type: "redo", store });
+    } else if (
+      // REGULAR TYPING
+      // @ts-ignore
+      event.target.isContentEditable &&
+      (isALetter(String.fromCharCode(event.keyCode)) ||
+        event.key === "Backspace")
+    ) {
+      // increase the chars counter
+      setCharsSinceUndo(charsSinceUndo + 1);
+
+      // @ts-ignore
+      const title = event.target.textContent;
+      if (charsSinceUndo >= store.charsPerUndo) {
+        dispatchList({ type: "update", id, title, store });
+        resetUndo();
+      } else if (undoTimer === undefined) {
+        // @ts-ignore
+        setUndoTimer(
+          setTimeout(() => {
+            console.log("undo timer");
+            dispatchList({ type: "update", id, title, store });
+            resetUndo();
+          }, store.msPerUndo)
+        );
+      }
     }
   }
 
@@ -120,22 +173,26 @@ export default function TaskList({
   }
 
   function handleBlur(event: FocusEvent<HTMLSpanElement>) {
+    if (duringUndo) {
+      return;
+    }
     // only for content editable spans
     if (!event.target.isContentEditable) {
       return;
     }
 
     const id = getDataID(event);
-    const task = getTaskByID(id);
-    task.title = event.target.textContent;
-    dispatchList({ type: "update", task, store });
-  }
-
-  if (!focusedID && list.length) {
-    setFocusedID(list[0].id);
+    dispatchList({
+      type: "update",
+      store,
+      id,
+      title: event.target.textContent || ""
+    });
+    resetUndo();
   }
 
   useEffect(() => {
+    setDuringUndo(false);
     if (!focusedNode) {
       return;
     }
@@ -154,7 +211,7 @@ export default function TaskList({
       onBlur={handleBlur}
     >
       <tbody>
-        {rootTasks.map(task => {
+        {rootTasks.map((task: TTask) => {
           const children = [];
           for (const child of getChildren(task.id, list)) {
             children.push(
@@ -183,79 +240,11 @@ export default function TaskList({
   );
 }
 
-export function Task({
-  task,
-  focusedID,
-  setFocusedNode
-}: {
-  task: TTask;
-  focusedID: TTaskID;
-  setFocusedNode: (HTMLElement) => void;
-}) {
-  const classes = useStyles({});
-  const { id, title } = task;
-  const labelId = `checkbox-list-label-${id}`;
-  const isSelected = id === focusedID;
-
-  const checkboxNode = (
-    <Checkbox
-      checked={task.isCompleted}
-      className={classes.checkbox}
-      edge="start"
-      tabIndex={-1}
-      disableRipple
-      inputProps={{ "aria-labelledby": labelId }}
-    />
-  );
-
-  const checkboxClasses = classnames(
-    classes.cell,
-    classes.checkboxCell,
-    isSelected ? classes.selectedCell : null
-  );
-
-  return (
-    <tr data-id={id} className={classes.row}>
-      <td className={checkboxClasses}>
-        {!task.parentID ? checkboxNode : null}
-      </td>
-      {task.parentID ? (
-        <td className={checkboxClasses}>{checkboxNode}</td>
-      ) : null}
-      <td
-        colSpan={task.parentID ? 1 : 2}
-        className={classnames(
-          classes.cell,
-          classes.titleCell,
-          isSelected ? classes.selectedCell : null
-        )}
-      >
-        <ArrowRightIcon className={classes.arrow} />
-        <span
-          contentEditable={true}
-          suppressContentEditableWarning={true}
-          className={classes.title}
-          ref={node => {
-            if (id === focusedID) {
-              setFocusedNode(node);
-            }
-          }}
-        >
-          {title}
-        </span>
-      </td>
-      <td className={classnames(classes.cell, classes.contentCell)}>
-        {task.content}
-      </td>
-    </tr>
-  );
-}
-
 /**
  * Returns the task ID from the event.
  */
 function getDataID(event: SyntheticEvent<Node>): TTaskID {
-  let node = event.target as Node;
+  let node = event.target as Node | null;
   while (node) {
     // @ts-ignore
     if (node.dataset?.id) {
@@ -266,3 +255,5 @@ function getDataID(event: SyntheticEvent<Node>): TTaskID {
   }
   throw new Error("missing [data-id]");
 }
+
+export default TaskList;
