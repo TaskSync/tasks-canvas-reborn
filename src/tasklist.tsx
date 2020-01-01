@@ -48,12 +48,14 @@ export default function TaskList({
   store: Store;
 }) {
   const classes = useStyles({});
-  const [focusedID, setFocusedID] = useState(null);
-  // TODO honor the caret position (width based non-monospace fonts)
-  // const [focusedCaretPos, setFocusedCaretPos] = useState(null);
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
-  const [focusedNode, setFocusedNode] = useState(null);
-  const parentTasks = list.filter(t => t.parentID === undefined);
+  const rootTasks = list.filter(t => t.parentID === undefined);
+
+  const [focusedID, setFocusedID] = useState(null);
+  let focusedNode;
+  function setFocusedNode(node: HTMLSpanElement) {
+    focusedNode = node;
+  }
 
   store.set(list);
 
@@ -120,7 +122,6 @@ export default function TaskList({
       });
     }
     setFocusedID(id);
-    event.preventDefault();
   }
 
   function handleBlur(event: FocusEvent<HTMLSpanElement>) {
@@ -133,6 +134,10 @@ export default function TaskList({
     const task = getTaskByID(id);
     task.title = event.target.textContent;
     dispatchList({ type: "update", task, store });
+  }
+
+  if (!focusedID && list.length) {
+    setFocusedID(list[0].id);
   }
 
   useEffect(() => {
@@ -154,7 +159,7 @@ export default function TaskList({
       onBlur={handleBlur}
     >
       <tbody>
-        {parentTasks.map(task => {
+        {rootTasks.map(task => {
           const children = [];
           for (const child of getChildren(task.id, list)) {
             children.push(
@@ -197,7 +202,7 @@ export function Task({
   const labelId = `checkbox-list-label-${id}`;
   const isSelected = id === focusedID;
 
-  const checkbox = (
+  const checkboxNode = (
     <Checkbox
       checked={task.isCompleted}
       className={classes.checkbox}
@@ -208,31 +213,25 @@ export function Task({
     />
   );
 
-  // TODO inline style
+  const checkboxClasses = classnames(
+    classes.cell,
+    classes.checkboxCell,
+    isSelected ? classes.selectedCell : null
+  );
+
   return (
     <tr data-id={id} className={classes.row}>
-      <td
-        className={classnames(
-          classes.cell,
-          classes.checkboxCell,
-          isSelected ? classes.selectedCell : null
-        )}
-      >
-        {checkbox}
+      <td className={checkboxClasses}>
+        {!task.parentID ? checkboxNode : null}
       </td>
+      {task.parentID ? (
+        <td className={checkboxClasses}>{checkboxNode}</td>
+      ) : null}
       <td
+        colSpan={task.parentID ? 1 : 2}
         className={classnames(
           classes.cell,
-          classes.checkboxCell,
-          isSelected ? classes.selectedCell : null
-        )}
-      >
-        {checkbox}
-      </td>
-      <td
-        className={classnames(
-          classes.cell,
-          classes.textCell,
+          classes.titleCell,
           isSelected ? classes.selectedCell : null
         )}
       >
