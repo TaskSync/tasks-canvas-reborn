@@ -1,7 +1,5 @@
-import { ListItemSecondaryAction } from "@material-ui/core";
 import Checkbox from "@material-ui/core/es/Checkbox";
-import List from "@material-ui/core/es/List";
-import ListItem from "@material-ui/core/es/ListItem";
+import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import classnames from "classnames";
 import React, {
   FocusEvent,
@@ -13,13 +11,11 @@ import React, {
   SyntheticEvent,
   Fragment
 } from "react";
-import uniqid from "uniqid";
 import { Store } from "./main";
 import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
 import { TAction, getChildren } from "./tasklist-ops";
 import { getCaretPosition } from "./utils";
-import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 
 export type TTaskID = string;
 export interface TTask {
@@ -68,7 +64,6 @@ export default function TaskList({
     const task = getTaskByID(id);
     if (["ArrowDown", "ArrowUp"].includes(event.key)) {
       const index = list.indexOf(task);
-      console.log("task", task.title);
       let indexChanged;
       // navigate between tasks
       if (event.key === "ArrowDown") {
@@ -250,7 +245,7 @@ export function Task({
         </span>
       </td>
       <td className={classnames(classes.cell, classes.contentCell)}>
-        aaaa{task.content}
+        {task.content}
       </td>
     </tr>
   );
