@@ -8,11 +8,13 @@ import useStyles from "./tasklist-css";
 function Task({
   task,
   focusedID,
-  setFocusedNode
+  setFocusedNode,
+  setNodeRef
 }: {
   task: TTask;
   focusedID: TTaskID;
-  setFocusedNode: (node: HTMLElement) => void;
+  setFocusedNode: (node: HTMLSpanElement) => void;
+  setNodeRef: (id: string, node: HTMLSpanElement) => void;
 }) {
   const classes = useStyles({});
   const { id, title } = task;
@@ -58,8 +60,13 @@ function Task({
           suppressContentEditableWarning={true}
           className={classes.title}
           ref={node => {
+            if (!node) {
+              return
+            }
+            setNodeRef(id, node as HTMLSpanElement);
+            // TODO get focusedNode from nodeRefs
             if (id === focusedID) {
-              setFocusedNode(node!);
+              setFocusedNode(node);
             }
           }}
         >

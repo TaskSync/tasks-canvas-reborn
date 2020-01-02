@@ -15,6 +15,7 @@
     "prettier": "^1.19.1",
     "react": "^16.11.0",
     "react-dom": "latest",
+    "selection-ranges": "^3.0.3",
     "store": "^2.0.12",
     "typescript": "^3.7.4",
     "uniqid": "^5.2.0"

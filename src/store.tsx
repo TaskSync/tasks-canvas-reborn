@@ -1,3 +1,4 @@
+// @ts-ignore
 import deepcopy from "deepcopy";
 
 export type TTaskID = string;
@@ -15,9 +16,17 @@ export interface TTask {
   isCompleted?: boolean;
 }
 
+export interface TRev {
+  tasks: TTask[];
+  focusedID: string;
+  selection: TSelection;
+}
+
+export type TSelection = [number, number];
+
 export class Store {
   // old revisions for undo, newest at the front (unshifted)
-  revs: TTask[][] = [];
+  revs: TRev[] = [];
 
   // TODO move those to TaskList params ???
   maxRevs = 20;
@@ -28,31 +37,37 @@ export class Store {
   // undo pointer
   revPointer: number | undefined = undefined;
 
-  addRev(tasks: TTask[]) {
-    console.log("add rev");
-    this.revs.unshift(deepcopy(tasks));
+  addRev(tasks: TTask[], focusedID: string, selection: TSelection) {
+    console.log("add rev", focusedID, selection);
+    this.revs.unshift({
+      tasks: deepcopy(tasks),
+      focusedID,
+      selection
+    });
     // trim
-    this.revs.length = this.maxRevs;
+    this.revs.length = Math.min(this.revs.length, this.maxRevs);
     this.revPointer = 0;
   }
-  undo(): TTask[] | undefined {
-    const length = this.revs.length;
-    const atNewestRev =
-      this.revPointer !== undefined && this.revPointer >= length - 1;
 
-    if (!length || atNewestRev) {
+  undo(): TRev | undefined {
+    if (this.revPointer === undefined) {
+      // not initialized
+      return;
+    }
+    const length = this.revs.length;
+    const atLatestRev = this.revPointer >= length - 1;
+
+    if (!length || atLatestRev) {
       return;
     }
 
-    if (this.revPointer === undefined) {
-      this.revPointer = 0;
-    } else {
-      this.revPointer++;
-    }
+    this.revPointer++;
     return deepcopy(this.revs[this.revPointer]);
   }
-  redo(): TTask[] | undefined {
+
+  redo(): TRev | undefined {
     if (this.revPointer === undefined) {
+      // not initialized
       return;
     }
     const length = this.revs.length;
@@ -62,11 +77,13 @@ export class Store {
     this.revPointer--;
     return deepcopy(this.revs[this.revPointer]);
   }
-  set(tasks: TTask[]) {
-    this.addRev(tasks)
+
+  set(tasks: TTask[], focusedID: string, selection: TSelection) {
+    this.addRev(tasks, focusedID, selection);
     // persist
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
+
   get(): TTask | null {
     const stored = localStorage.getItem("tasks");
     return stored ? JSON.parse(stored) : null;
