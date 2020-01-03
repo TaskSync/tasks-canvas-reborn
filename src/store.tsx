@@ -14,11 +14,8 @@ export interface TTask {
   previous: TTaskID | undefined;
   // TODO iso date ?
   created: number;
-  updated: {
-    // must be timestamp (miliseconds)
-    // TODO iso date ?
-    canvas: number | null;
-  };
+  // TODO iso date ?
+  updated: number;
   isCompleted?: boolean;
 }
 

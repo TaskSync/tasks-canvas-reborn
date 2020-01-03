@@ -10,6 +10,9 @@ c table layout
   - support sorting (eg by date)
   + import / export
   - save when leaving the page
+  - tests
+    - actions
+    - sorting
 - other shortcuts
   - get the original ones
   - bind
@@ -20,14 +23,17 @@ c table layout
 - moving tasks
   - keyboard
   - drag & drop
+- left menu with task lists
+- top navbar
 - service worker
+
+## Milestone 2:
 + bind to the sync engine
   + bootstrap the integration
   - new JSON merge source
   - client side google auth 
-- left menu with task lists
 
-## Milestone 2:
+## Milestone 3:
 - Navigation mode (modal)
   - search as you type
   - SPECIAL+N to switch

@@ -1,4 +1,4 @@
-// import { map } from "lodash-es";
+import { remove } from "lodash-es";
 import assert from "assert";
 import uniqid from "uniqid";
 import Store, { TSelection, TTask, TTaskID } from "./store";
@@ -10,7 +10,7 @@ export type TAction =
   | TNewline
   | TIndent
   | TCompleted
-  | TUnIndent
+  | TOutdent
   | TUndo
   | TRedo
   | TMergePrevLine;
@@ -22,7 +22,7 @@ export type TUpdate = {
   title: string;
 } & TTaskActionBase;
 export type TIndent = { type: "indent" } & TTaskActionBase;
-export type TUnIndent = { type: "outdent" } & TTaskActionBase;
+export type TOutdent = { type: "outdent" } & TTaskActionBase;
 export type TCompleted = {
   type: "completed";
   completed: boolean;
@@ -59,7 +59,7 @@ export type TUndoBase = {
   store: Store;
 };
 
-// TODO update the timestamp
+// TODO bump the updated field on every action
 
 export function update(tasks: TTask[], action: TUpdate): TTask[] {
   let task = tasks.find(task => task.id === action.id);
@@ -71,8 +71,10 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
 
   // modify
   task.title = action.title;
+  task.updated = now();
+
   console.log(`updated ${action.id} with`, task.title);
-  const ret = [...tasks];
+  const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
@@ -105,55 +107,95 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
   task.parent = previousOnRootDepth.id;
 
   console.log(`indent ${action.id}`);
-  const ret = [...tasks];
+  const ret = sortTasks(tasks);
+  console.log(ret);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
 
-export function unindent(tasks: TTask[], action: TUnIndent): TTask[] {
-  let task = tasks.find(task => task.id === action.id);
-  assert(task);
-  task = task!;
+export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
+  const task = getTaskByID(action.id, tasks);
+
+  // dont outdent children
+  if (!task.parent) {
+    return tasks;
+  }
 
   // modify
+
+  // outdent next (visible) child siblings
+  let nextSibling;
+  do {
+    // TODO fix user-order for all siblings being moved here (when sorted)
+    nextSibling = getVisibleNext(action.id, tasks);
+    if (!nextSibling || nextSibling.parent !== task.parent) {
+      break;
+    }
+    nextSibling.parent = undefined;
+  } while (nextSibling);
+
+  // link the siblings
+  const nextOnRootLevel = getNext(task.parent, tasks);
+
+  // place after the old parent
   task.parent = undefined;
-  console.log(`unindent ${action.id}`);
-  // TODO unindent next siblings
-  const ret = [...tasks];
+  setPrevious(task.id, tasks, task.parent);
+  if (nextOnRootLevel) {
+    setPrevious(
+      nextOnRootLevel.id,
+      tasks,
+      // link the next root task to this one or the last sibling
+      (nextSibling && nextSibling.id) || task.id
+    );
+  }
+
+  console.log(`outdent ${action.id}`);
+  const ret = sortTasks(tasks);
+  console.log(ret);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
 
-// splits a task to two on Enter key
+// splits a task into two on Enter key
 export function newline(tasks: TTask[], action: TNewline): TTask[] {
-  let task = tasks.find(task => task.id === action.id);
-  assert(task);
-  task = task!;
+  const task = getTaskByID(action.id, tasks);
 
-  // modify
-  const index = tasks.indexOf(task);
   const task1Title = task.title.slice(0, action.selection[0]);
   const task2Title = task.title.slice(action.selection[1]);
 
   console.log(`newline`, action.id);
   task.title = task1Title;
+
   // TODO extract the factory
-  // TODO setPrevious()
   const task2: TTask = {
     id: uniqid(),
     title: task2Title,
-    parent: task.parent
-      ? task.parent
-      : getChildren(task.id, tasks).length
-      ? task.id
-      : undefined,
-    created: Date.now(),
-    updated: {
-      canvas: Date.now()
-    }
+    parent: undefined,
+    previous: undefined,
+    created: now(),
+    updated: now()
   };
-  // TODO set previous to the next task
-  const ret = [...tasks.slice(0, index + 1), task2, ...tasks.slice(index + 1)];
+
+  // modify
+
+  // place the new task
+  // - after the initial one (when no children)
+  // - as a first child (in case of children)
+  if (task.parent) {
+    task2.parent = task.parent;
+    task2.previous = task.id;
+    const nextSibling = getNext(task.id, tasks);
+    if (nextSibling) {
+      nextSibling.previous = task2.id;
+    }
+  } else if (getChildren(task.id, tasks).length) {
+    const first = getFirstChild(task.id, tasks)!;
+    assert(first);
+    first.previous = task2.id;
+  }
+
+  tasks.push(task2);
+  const ret = sortTasks(tasks);
 
   action.store.set(ret, action.id, action.selection);
   action.setFocusedID(task2.id);
@@ -163,17 +205,16 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
 // merges two tasks into one after Backspace on the line beginning
 export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
-  let taskToDelete = tasks.find(task => task.id === action.id);
-  assert(taskToDelete);
-  taskToDelete = taskToDelete!;
+  const taskToDelete = getTaskByID(action.id, tasks);
 
-  // modify
   const indexToDelete = tasks.indexOf(taskToDelete);
-  console.log(`mergePrevLine`, taskToDelete, indexToDelete);
   // dont merge-up the first task
   if (indexToDelete === 0) {
     return tasks;
   }
+
+  // modify
+  console.log(`mergePrevLine`, taskToDelete, indexToDelete);
 
   const previous = tasks[indexToDelete - 1];
   previous.title += " " + taskToDelete.title;
@@ -183,29 +224,26 @@ export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
   const caret = previous.title.length - taskToDelete.title.length - 1;
   action.setSelection([caret, caret]);
 
-  const ret = [
-    ...tasks.slice(0, indexToDelete),
-    ...tasks.slice(indexToDelete + 1)
-  ];
+  tasks = remove(tasks, (t: TTask) => t.id === taskToDelete.id);
+  const ret = sortTasks(tasks);
 
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
 
 export function completed(tasks: TTask[], action: TCompleted): TTask[] {
-  let task = tasks.find(task => task.id === action.id);
-  assert(task);
+  const task = getTaskByID(action.id, tasks);
 
   // modify
-  task = task!;
   task.isCompleted = action.completed;
-  const ret = [...tasks];
+
+  console.log(`completed`, task.id, action.completed);
+  const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
 
 export function undo(tasks: TTask[], action: TUndo): TTask[] {
-  // debugger
   const rev = action.store.undo();
   // no more undos
   if (!rev) {
@@ -249,10 +287,114 @@ export function redo(tasks: TTask[], action: TUndo): TTask[] {
 
 // helper functions
 
-export function sort(tasks: TTask[], order: "created" | "updated" | "user") {}
+/**
+ * Always returns a new array.
+ */
+export function sortTasks(
+  tasks: TTask[],
+  order: "user" | "created" | "updated" | "duedate" = "user"
+): TTask[] {
+  // TODO implement
+  //  may cause unexpected results with various actions bc of the positions
+  if (order === "user") {
+    if (isUserSorted(tasks)) {
+      return [...tasks];
+    }
+    console.log("sorting by user");
+    // TODO optimize
+    // build a map
+    const prevToPos = {};
+    let root: TTask | undefined;
+    for (let i = 0; i < tasks.length; i++) {
+      let task = tasks[i];
+      prevToPos[task.id] = i;
+      if (!task.previous && !task.parent) {
+        assert(!root);
+        root = task;
+      }
+    }
+    assert(root);
+    root = root!;
+    // sort
+    const sorted: TTask[] = [root];
+    let previousOnRootLevel = root;
+    for (let i = 0; i < tasks.length - 1; i++) {
+      const task = sorted[0];
+      let next = tasks.find(
+        (t: TTask) =>
+          !sorted.includes(t) &&
+          // simply linked
+          (t.previous === task.id ||
+            // first child
+            (t.parent === task.id && !t.previous) ||
+            // back to the root level
+            t.previous === previousOnRootLevel.id)
+      );
+      assert(next);
+      next = next!;
+      sorted.push(next);
+      if (!next.parent) {
+        previousOnRootLevel = next;
+      }
+    }
+    assert(sorted.length === tasks.length, "missing tasks after sorting");
+    return sorted;
+  }
+  return [...tasks];
+}
+
+// TODO should be TRUE for action.type === update
+export function isUserSorted(tasks: TTask[]): boolean {
+  if (!tasks.length) {
+    return true;
+  }
+  if (tasks[0].parent || tasks[0].previous) {
+    return false;
+  }
+  let previous: TTask = tasks[0];
+  let previousOnRootLevel: TTask = tasks[0];
+  for (let i = 1; i < tasks.length; i++) {
+    const task = tasks[i];
+
+    // parent mismatch
+    if (previous.parent && task.parent && task.parent !== previous.parent) {
+      return false;
+    }
+    // linked list mismatch (when the same parent)
+    if (task.previous !== previous.id && task.parent === previous.parent) {
+      return false;
+    }
+    // first child shouldnt have a `previous`
+    if (task.parent && !previous.parent && task.previous) {
+      return false;
+    }
+    // first child shouldnt have a `previous`
+    if (task.parent && !previous.parent && task.previous) {
+      return false;
+    }
+    // after the last child, check `previous`
+    if (
+      !task.parent &&
+      previous.parent &&
+      task.previous !== previousOnRootLevel.id
+    ) {
+      return false;
+    }
+
+    previous = task;
+    if (!task.parent) {
+      previousOnRootLevel = task;
+    }
+  }
+  return true;
+}
 
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
   return tasks.filter(t => t.parent === id);
+}
+
+export function getFirstChild(id: TTaskID, tasks: TTask[]): TTask | null {
+  return getChildren(id, tasks).find(t => t.previous === undefined) || null;
 }
 
 export function getTaskByID(id: TTaskID, tasks: TTask[]): TTask {
@@ -287,6 +429,27 @@ export function getVisiblePrevious(
   return null;
 }
 
+export function getVisibleNext(
+  id: TTaskID,
+  tasks: TTask[],
+  sameDepth = false
+): TTask | null {
+  const task = getTaskByID(id, tasks);
+  let index = tasks.indexOf(task);
+  index++;
+  while (index !== tasks.length - 1) {
+    const previous = tasks[index];
+    // check the depth
+    if (sameDepth && previous.parent === task.parent) {
+      return previous;
+    } else if (!sameDepth) {
+      return previous;
+    }
+    index++;
+  }
+  return null;
+}
+
 /**
  * Set a new previous for a task and update the old `next`.
  * @param id
@@ -316,4 +479,8 @@ export function setPrevious(
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
   const next = tasks.find(task => task.previous === id);
   return next || null;
+}
+
+export function now(): number {
+  return Date.now();
 }
