@@ -65,6 +65,13 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     title: string;
   } | null>(null);
 
+  // TYPING
+
+  let selectionBeforeTyping: TSelection | null = null;
+  let titleBeforeTyping: string | null = null;
+
+  // HELPERS
+
   function getTaskByID(id: string): TTask {
     return list.find((task: TTask) => task.id === id);
   }
@@ -92,25 +99,33 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     return selection || def;
   }
 
+  // HANDLERS
+
   /**
-   * Handles various app shortcuts like Tab.
+   * Handles:
+   * - tab
+   * - arrow up / down
+   * - backspace (beginning of a line)
+   * - selection deletion (along with keyUp)
    */
-  function handleKeyBindings(event: KeyboardEvent<HTMLElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     const id = getDataID(event);
     const task = getTaskByID(id);
     const target = event.target as HTMLElement;
+    titleBeforeTyping = target.textContent || "";
 
     // always save text before performing other action
     function createRevision() {
-      console.log("saveText");
+      console.log("createRevision");
       dispatchList({
         type: "update",
         store,
         id,
         // @ts-ignore
-        title: event.target.textContent || "",
+        title: target.textContent || "",
         selection
       });
+      resetUndoCounters();
     }
 
     const undoPressed =
@@ -220,10 +235,9 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
 
     // DELETE SELECTION
-    else if (event.key === "Backspace" && selection[0] != selection[1]) {
-      // TODO support all keys causing a deletion
-      // create a revision when deleting a selection
-      createRevision();
+    else if (selection[0] != selection[1]) {
+      // memorize the selection to check if it has been deleted on keyUp
+      selectionBeforeTyping = selection;
     }
   }
 
@@ -231,8 +245,9 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
    * Handles:
    * - typing
    * - task switching with arrows
+   * - selection deletion
    */
-  function handleTypingAndSwitching(event: KeyboardEvent<HTMLElement>) {
+  function handleKeyUp(event: KeyboardEvent<HTMLElement>) {
     const id = getDataID(event);
     const target = event.target as HTMLElement;
 
@@ -246,38 +261,41 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       return;
     }
 
-    // handle typing
-    const char = String.fromCharCode(event.keyCode);
-    if (!isALetter(char) && event.key !== "Backspace") {
-      return;
-    }
-
-    const selection = persistSelection(id, target);
+    // TYPING ON A SELECTION
     const title = target.textContent || "";
+    if (selectionBeforeTyping && title !== titleBeforeTyping) {
+      const selection = persistSelection(id, target);
 
-    // increase the chars counter
-    setCharsSinceUndo(charsSinceUndo + 1);
-
-    if (charsSinceUndo >= store.charsPerUndo) {
-      // create a revision after an X amount of modifications
       dispatchList({ type: "update", id, title, store, selection });
-      resetUndoCounters();
-    } else if (undoTimer === undefined) {
-      // handle a time-based revision
-      setUndoTimer(setTimeout(createRev, store.msPerUndo));
-      function createRev() {
-        console.log("undo timer");
-        // get the newest version
-        const title = nodeRefs[id].textContent || "";
-        // save
-        dispatchList({
-          type: "update",
-          id,
-          title,
-          store,
-          selection
-        });
+    }
+    // TYPING
+    else if (!selectionBeforeTyping && title !== titleBeforeTyping) {
+      const selection = persistSelection(id, target);
+
+      // increase the chars counter
+      setCharsSinceUndo(charsSinceUndo + 1);
+
+      if (charsSinceUndo >= store.charsPerUndo) {
+        // create a revision after an X amount of modifications
+        dispatchList({ type: "update", id, title, store, selection });
         resetUndoCounters();
+      } else if (undoTimer === undefined) {
+        // handle a time-based revision
+        setUndoTimer(setTimeout(createRev, store.msPerUndo));
+        function createRev() {
+          console.log("undo timer");
+          // get the newest version
+          const title = nodeRefs[id].textContent || "";
+          // save
+          dispatchList({
+            type: "update",
+            id,
+            title,
+            store,
+            selection
+          });
+          resetUndoCounters();
+        }
       }
     }
   }
@@ -368,8 +386,8 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     <table
       className={classes.table}
       onMouseUp={handleClick}
-      onKeyUp={handleTypingAndSwitching}
-      onKeyDown={handleKeyBindings}
+      onKeyUp={handleKeyUp}
+      onKeyDown={handleKeyDown}
       onBlur={handleBlur}
     >
       <tbody>
