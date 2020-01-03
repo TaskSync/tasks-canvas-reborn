@@ -5,17 +5,18 @@ c list UI
   c key navigation
 c table layout
 + local storage backend
-  - support undo
+  c support undo
+  - add a new task
   - support sorting (eg by date)
   + import / export
   - save when leaving the page
-- edit dialog
-  - title
-  - content
-- shortcuts
+- other shortcuts
   - get the original ones
   - bind
   - dialog with a list
+- edit dialog
+  - title
+  - content
 - moving tasks
   - keyboard
   - drag & drop

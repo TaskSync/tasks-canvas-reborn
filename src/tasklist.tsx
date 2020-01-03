@@ -16,7 +16,7 @@ import Task from "./task";
 import useStyles from "./tasklist-css";
 import * as ops from "./tasklist-ops";
 import { TAction, getChildren } from "./tasklist-ops";
-import { getSelection, isALetter } from "./utils";
+import { getSelection } from "./utils";
 
 function tasksReducer(state: TTask[], action: TAction) {
   // @ts-ignore TODO type
@@ -26,7 +26,7 @@ function tasksReducer(state: TTask[], action: TAction) {
 function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
-  const rootTasks = list.filter((t: TTask) => t.parentID === undefined);
+  const rootTasks = list.filter((t: TTask) => t.parent === undefined);
 
   // TODO generate the first empty record if length === 0
   assert(list[0].id);
@@ -94,8 +94,8 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const selection = getSelection(node);
     if (selection !== undefined) {
       setSelection(selection);
+      console.log("persistSelection", id, selection);
     }
-    console.log("persistSelection", id, selection);
     return selection || def;
   }
 

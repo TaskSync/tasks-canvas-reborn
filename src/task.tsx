@@ -41,13 +41,13 @@ function Task({
   return (
     <tr data-id={id} className={classes.row}>
       <td className={checkboxClasses}>
-        {!task.parentID ? checkboxNode : null}
+        {!task.parent ? checkboxNode : null}
       </td>
-      {task.parentID ? (
+      {task.parent ? (
         <td className={checkboxClasses}>{checkboxNode}</td>
       ) : null}
       <td
-        colSpan={task.parentID ? 1 : 2}
+        colSpan={task.parent ? 1 : 2}
         className={classnames(
           classes.cell,
           classes.titleCell,

@@ -7,10 +7,16 @@ export interface TTask {
   id: TTaskID;
   title: string;
   content?: string;
-  parentID: TTaskID | undefined;
+  // TODO
+  // tasklist: TTaskListID;
+  parent: TTaskID | undefined;
+  // user sorting
+  previous: TTaskID | undefined;
+  // TODO iso date ?
   created: number;
   updated: {
     // must be timestamp (miliseconds)
+    // TODO iso date ?
     canvas: number | null;
   };
   isCompleted?: boolean;

@@ -11,21 +11,23 @@ export default [
   },
   {
     id: "id-1",
-    parentID: "id-0",
+    parent: "id-0",
     title: "123 456",
     updated: { canvas: now },
     created: now
   },
-  // {
-  //   id: "id-2",
-  //   title: "test 3",
-  //   updated: { canvas: now },
-  //   created: now
-  // },
-  // {
-  //   id: "id-3",
-  //   title: "test 4",
-  //   updated: { canvas: now },
-  //   created: now
-  // }
+  {
+    id: "id-2",
+    previous: "id-0",
+    title: "test 3",
+    updated: { canvas: now },
+    created: now
+  },
+  {
+    id: "id-3",
+    previous: "id-2",
+    title: "test 4",
+    updated: { canvas: now },
+    created: now
+  }
 ] as TTask[];
