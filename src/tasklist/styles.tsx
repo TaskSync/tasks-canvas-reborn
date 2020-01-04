@@ -1,6 +1,7 @@
+// @ts-ignore TODO type
 import { createStyles, makeStyles, Theme } from "@material-ui/core/es/styles";
 
-export default makeStyles((theme: Theme) =>
+export default makeStyles((_: Theme) =>
   createStyles({
     table: {
       width: "100%",
@@ -50,8 +51,10 @@ export default makeStyles((theme: Theme) =>
       top: 0
     },
     checkbox: {
-      padding: 0,
-      margin: 0,
+      // TODO WTF?
+      padding: '0 !important',
+      // TODO WTF?
+      margin: '0 !important',
       "font-size": "1.2rem"
     },
     indent: {

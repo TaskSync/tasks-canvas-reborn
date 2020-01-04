@@ -1,6 +1,16 @@
 import assert from "assert";
 import { remove } from "lodash";
 import uniqid from "uniqid";
+import {
+  getNext,
+  setPrevious,
+  getVisiblePrevious,
+  getSiblings,
+  getTaskByID,
+  getFirstChild,
+  getChildren
+} from "./actions-helpers";
+import { sortTasks } from "./sorting";
 import Store, { TSelection, TTask, TTaskID, now } from "./store";
 
 // types
@@ -115,7 +125,7 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
   for (const child of children) {
     if (firstChild) {
       child.previous = task.id;
-      firstChild = false
+      firstChild = false;
     }
     child.parent = newParent.id;
   }
@@ -135,7 +145,7 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
     return tasks;
   }
 
-  const rightSiblings = getSiblings(task.id, tasks, 'right')
+  const rightSiblings = getSiblings(task.id, tasks, "right");
   const nextOnRootLevel = getNext(task.parent, tasks);
 
   // MODIFY
@@ -143,9 +153,9 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
   // outdent next (visible) child siblings
   let lastSibling;
   for (const sibling of rightSiblings) {
-    sibling.parent = undefined
-    sibling.updated = now()
-    lastSibling = sibling
+    sibling.parent = undefined;
+    sibling.updated = now();
+    lastSibling = sibling;
   }
 
   // place after the old parent
@@ -299,232 +309,4 @@ export function redo(tasks: TTask[], action: TUndo): TTask[] {
   action.setManualTaskTitle({ id: rev.focusedID, title: task.title });
 
   return rev.tasks;
-}
-
-// helper functions
-
-/**
- * Sorts and returns a new array.
- *
- * TODO implement other types of sorting
- *   may cause unexpected results with various actions bc of the positions
- */
-export function sortTasks(
-  tasks: TTask[],
-  order: "user" | "created" | "updated" | "duedate" = "user"
-): TTask[] {
-  // TODO optimize (aka the worst soring ever made)
-  if (order === "user") {
-    if (isUserSorted(tasks)) {
-      return [...tasks];
-    }
-    console.log("sorting by user");
-
-    // find the first task
-    let first: TTask | undefined = tasks.find(
-      (t: TTask) => !t.previous && !t.parent
-    );
-    assert(first);
-    first = first!;
-
-    // sort by looking for the next task
-    const sorted: TTask[] = [first];
-    let previousOnRootLevel: TTaskID = first.id;
-    for (let i = 0; i < tasks.length - 1; i++) {
-      // start from the last sorted one
-      const task = sorted[i];
-      let next: TTask | undefined;
-
-      // first child
-      if (!task.parent) {
-        next = tasks.find((t: TTask) => t.parent === task.id && !t.previous);
-      }
-      // next child sibling
-      else {
-        next = tasks.find(
-          (t: TTask) => t.parent === task.parent && t.previous === task.id
-        );
-      }
-
-      // next root sibling
-      if (!next && previousOnRootLevel) {
-        next = tasks.find(
-          (t: TTask) => !t.parent && t.previous === previousOnRootLevel
-        );
-      }
-
-      assert(next);
-      next = next!;
-
-      sorted.push(next);
-      if (!next.parent) {
-        previousOnRootLevel = next.id;
-      }
-    }
-    assert(sorted.length === tasks.length, "missing tasks after sorting");
-    return sorted;
-  }
-  return [...tasks];
-}
-
-// TODO should be TRUE for action.type === update
-export function isUserSorted(tasks: TTask[]): boolean {
-  if (!tasks.length) {
-    return true;
-  }
-  if (tasks[0].parent || tasks[0].previous) {
-    return false;
-  }
-  let previous: TTask = tasks[0];
-  let previousOnRootLevel: TTask = tasks[0];
-  for (let i = 1; i < tasks.length; i++) {
-    const task = tasks[i];
-
-    // parent mismatch
-    if (previous.parent && task.parent && task.parent !== previous.parent) {
-      return false;
-    }
-    // linked list mismatch (when the same parent)
-    if (task.previous !== previous.id && task.parent === previous.parent) {
-      return false;
-    }
-    // first child shouldnt have a `previous`
-    if (task.parent && !previous.parent && task.previous) {
-      return false;
-    }
-    // after the last child, check `previous`
-    if (
-      !task.parent &&
-      previous.parent &&
-      task.previous !== previousOnRootLevel.id
-    ) {
-      return false;
-    }
-
-    previous = task;
-    if (!task.parent) {
-      previousOnRootLevel = task;
-    }
-  }
-  return true;
-}
-
-// HELPERS
-
-export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
-  return tasks.filter(t => t.parent === id);
-}
-
-export function getFirstChild(id: TTaskID, tasks: TTask[]): TTask | null {
-  return getChildren(id, tasks).find(t => t.previous === undefined) || null;
-}
-
-export function getTaskByID(id: TTaskID, tasks: TTask[]): TTask {
-  const task = tasks.find(task => task.id === id);
-  assert(task);
-  return task!;
-}
-
-function getSiblings(
-  id: TTaskID,
-  tasks: TTask[],
-  direction: "both" | "right" | "left" = "both"
-): TTask[] {
-  const siblings: TTask[] = [];
-
-  if (direction === "left" || direction === "both") {
-    let sibling: TTask | null = getTaskByID(id, tasks);
-    do {
-      sibling = getVisiblePrevious(sibling!.id, tasks, true);
-      if (sibling) {
-        siblings.push(sibling);
-      }
-    } while (sibling);
-  }
-
-  if (direction === "right" || direction === "both") {
-    let sibling: TTask | null = getTaskByID(id, tasks);
-    do {
-      sibling = getVisibleNext(sibling!.id, tasks, true);
-      if (sibling) {
-        siblings.push(sibling);
-      }
-    } while (sibling);
-  }
-
-  return siblings;
-}
-
-/**
- * Returns the previous visible task on the list.
- *
- * Different then user-sorting previous (task.previous).
- */
-export function getVisiblePrevious(
-  id: TTaskID,
-  tasks: TTask[],
-  sameLevel = false
-): TTask | null {
-  const task = getTaskByID(id, tasks);
-  let index = tasks.indexOf(task);
-  index--;
-  while (index !== -1) {
-    const previous = tasks[index];
-    // check the depth
-    if (sameLevel && previous.parent === task.parent) {
-      return previous;
-    } else if (!sameLevel) {
-      return previous;
-    }
-    index--;
-  }
-  return null;
-}
-
-export function getVisibleNext(
-  id: TTaskID,
-  tasks: TTask[],
-  sameLevel = false
-): TTask | null {
-  const task = getTaskByID(id, tasks);
-  let index = tasks.indexOf(task);
-  index++;
-  while (index < tasks.length) {
-    const previous = tasks[index];
-    // check the depth
-    if (sameLevel && previous.parent === task.parent) {
-      return previous;
-    } else if (!sameLevel) {
-      return previous;
-    }
-    index++;
-  }
-  return null;
-}
-
-/**
- * Set a new previous for a task and update the old `next`.
- */
-export function setPrevious(
-  id: TTaskID,
-  tasks: TTask[],
-  previous: TTaskID | undefined
-) {
-  const task = getTaskByID(id, tasks);
-  const next = getNext(id, tasks);
-  // keep the one-way-linked-list consistent
-  if (next) {
-    next.previous = task.previous;
-  }
-  task.previous = previous;
-}
-
-/**
- * Returns the task pointing to ID as the previous one (if any).
- *
- * User sorting, not the currently visible order.
- */
-export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
-  const next = tasks.find(task => task.previous === id);
-  return next || null;
 }

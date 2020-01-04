@@ -3,7 +3,7 @@ import deepcopy from "deepcopy";
 
 export type TTaskID = string;
 
-export interface TTask {
+export type TTask = {
   id: TTaskID;
   title: string;
   content?: string;
@@ -17,13 +17,13 @@ export interface TTask {
   // TODO iso date ?
   updated: number;
   isCompleted?: boolean;
-}
+};
 
-export interface TRev {
+export type TRev = {
   tasks: TTask[];
   focusedID: string;
   selection: TSelection;
-}
+};
 
 export type TSelection = [number, number];
 
@@ -84,10 +84,12 @@ export class Store {
   set(tasks: TTask[], focusedID: string, selection: TSelection) {
     this.addRev(tasks, focusedID, selection);
     // persist
+    // TODO use the tasklist's id
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
   get(): TTask[] | null {
+    // TODO use the tasklist's id
     const stored = localStorage.getItem("tasks");
     return stored ? JSON.parse(stored) : null;
   }

@@ -1,9 +1,10 @@
+// @ts-ignore TODO type
 import Checkbox from "@material-ui/core/es/Checkbox";
 import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import classnames from "classnames";
 import React from "react";
 import { TTask, TTaskID } from "./store";
-import useStyles from "./tasklist-css";
+import useStyles from "./styles";
 
 function Task({
   task,
@@ -32,7 +33,7 @@ function Task({
     />
   );
 
-  const checkboxClasses = classnames(
+  const checkboxCellClasses = classnames(
     classes.cell,
     classes.checkboxCell,
     isSelected ? classes.selectedCell : null
@@ -40,12 +41,8 @@ function Task({
 
   return (
     <tr data-id={id} className={classes.row}>
-      <td className={checkboxClasses}>
-        {!task.parent ? checkboxNode : null}
-      </td>
-      {task.parent ? (
-        <td className={checkboxClasses}>{checkboxNode}</td>
-      ) : null}
+      <td className={checkboxCellClasses}>{!task.parent ? checkboxNode : null}</td>
+      {task.parent ? <td className={checkboxCellClasses}>{checkboxNode}</td> : null}
       <td
         colSpan={task.parent ? 1 : 2}
         className={classnames(
@@ -61,7 +58,7 @@ function Task({
           className={classes.title}
           ref={node => {
             if (!node) {
-              return
+              return;
             }
             setNodeRef(id, node as HTMLSpanElement);
             // TODO get focusedNode from nodeRefs

@@ -11,11 +11,12 @@ import React, {
 } from "react";
 // @ts-ignore
 import { setRange } from "selection-ranges";
+import * as ops from "./actions";
+import { TAction } from "./actions";
+import { getChildren } from "./actions-helpers";
 import { Store, TTask, TTaskID, TSelection } from "./store";
+import useStyles from "./styles";
 import Task from "./task";
-import useStyles from "./tasklist-css";
-import * as ops from "./tasklist-ops";
-import { TAction, getChildren } from "./tasklist-ops";
 import { getSelection } from "./utils";
 
 function tasksReducer(state: TTask[], action: TAction) {

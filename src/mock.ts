@@ -1,4 +1,4 @@
-import { TTask, now } from "./store";
+import { TTask, now } from "./tasklist/store";
 
 export default [
   {

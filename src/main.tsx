@@ -1,9 +1,9 @@
 import { saveAs } from "file-saver";
 import React from "react";
 import ReactDOM from "react-dom";
-import TaskList from "./tasklist";
 import defaultTasks from "./mock";
-import Store, { TTask } from "./store";
+import Store, { TTask } from "./tasklist/store";
+import TaskList from "./tasklist/tasklist";
 
 const store = new Store();
 let cached: TTask[] | null;
