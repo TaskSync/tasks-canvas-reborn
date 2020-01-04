@@ -4,7 +4,7 @@
     "set-build:compat": "rm .browserslistrc; cp dev/browserslistrc-compat .browserslistrc",
     "serve": "todo; node src/serve.js & local-ssl-proxy --source 3000 --target 5000",
     "tsc": "tsc",
-    "build": "yarn build:prod; yarn build:compat",
+    "build": "yarn build:prod; yarn build:compat; yarn set-build:prod",
     "build:prod": "yarn set-build:prod; parcel build --out-dir dist/build src/index.html",
     "build:compat": "yarn set-build:compat; parcel build --out-dir dist/build-compat src/index.html",
     "start": "parcel src/index.html",

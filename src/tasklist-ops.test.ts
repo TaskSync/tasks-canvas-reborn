@@ -1,5 +1,5 @@
-import { TTask } from "./store";
-import { sortTasks, now, isUserSorted } from "./tasklist-ops";
+import { TTask, now } from "./store";
+import { sortTasks, isUserSorted } from "./tasklist-ops";
 // @ts-ignore
 
 describe("sorting", () => {

@@ -93,4 +93,9 @@ export class Store {
   }
 }
 
+// TODO iso date?
+export function now(): number {
+  return Date.now();
+}
+
 export default Store;

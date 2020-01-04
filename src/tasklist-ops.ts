@@ -1,7 +1,7 @@
-import { remove } from "lodash";
 import assert from "assert";
+import { remove } from "lodash";
 import uniqid from "uniqid";
-import Store, { TSelection, TTask, TTaskID } from "./store";
+import Store, { TSelection, TTask, TTaskID, now } from "./store";
 
 // types
 
@@ -105,10 +105,10 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
     setPrevious(task.id, tasks, undefined);
   }
   task.parent = previousOnRootDepth.id;
+  task.updated = now();
 
   console.log(`indent ${action.id}`);
   const ret = sortTasks(tasks);
-  console.log(ret);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
@@ -132,13 +132,14 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
       break;
     }
     nextSibling.parent = undefined;
+    nextSibling.updated = now();
   } while (nextSibling);
 
   // link the siblings
   const nextOnRootLevel = getNext(task.parent, tasks);
 
   // place after the old parent
-  task.parent = undefined;
+  assert(task.parent);
   setPrevious(task.id, tasks, task.parent);
   if (nextOnRootLevel) {
     setPrevious(
@@ -148,10 +149,11 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
       (nextSibling && nextSibling.id) || task.id
     );
   }
+  task.parent = undefined;
+  task.updated = now();
 
   console.log(`outdent ${action.id}`);
   const ret = sortTasks(tasks);
-  console.log(ret);
   action.store.set(ret, action.id, action.selection);
   return ret;
 }
@@ -309,7 +311,7 @@ export function sortTasks(
       let task = tasks[i];
       prevToPos[task.id] = i;
       if (!task.previous && !task.parent) {
-        assert(!root);
+        assert(!root, "duplicate root detected");
         root = task;
       }
     }
@@ -362,10 +364,6 @@ export function isUserSorted(tasks: TTask[]): boolean {
     }
     // linked list mismatch (when the same parent)
     if (task.previous !== previous.id && task.parent === previous.parent) {
-      return false;
-    }
-    // first child shouldnt have a `previous`
-    if (task.parent && !previous.parent && task.previous) {
       return false;
     }
     // first child shouldnt have a `previous`
@@ -452,9 +450,6 @@ export function getVisibleNext(
 
 /**
  * Set a new previous for a task and update the old `next`.
- * @param id
- * @param tasks
- * @param previous
  */
 export function setPrevious(
   id: TTaskID,
@@ -463,11 +458,10 @@ export function setPrevious(
 ) {
   const task = getTaskByID(id, tasks);
   const next = getNext(id, tasks);
-  if (!next) {
-    return;
-  }
   // keep the one-way-linked-list consistent
-  next.previous = task.previous;
+  if (next) {
+    next.previous = task.previous;
+  }
   task.previous = previous;
 }
 
@@ -479,8 +473,4 @@ export function setPrevious(
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
   const next = tasks.find(task => task.previous === id);
   return next || null;
-}
-
-export function now(): number {
-  return Date.now();
 }

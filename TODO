@@ -1,5 +1,6 @@
 ## Bugs
 - lodash-es breaks jest
+  - increases the bundle size by +100kb (confirm?)
 
 ## Milestone 1:
 c list UI
