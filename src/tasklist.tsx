@@ -26,7 +26,7 @@ function tasksReducer(state: TTask[], action: TAction) {
 function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(tasksReducer, tasks);
-  const rootTasks = list.filter((t: TTask) => t.parent === undefined);
+  const rootTasks = list.filter((t: TTask) => !t.parent);
 
   // TODO generate the first empty record if length === 0
   assert(list[0].id);

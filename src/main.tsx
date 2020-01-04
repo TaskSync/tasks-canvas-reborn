@@ -6,7 +6,7 @@ import defaultTasks from "./mock";
 import Store, { TTask } from "./store";
 
 const store = new Store();
-let cached: TTask[];
+let cached: TTask[] | null;
 
 try {
   cached = store.get();

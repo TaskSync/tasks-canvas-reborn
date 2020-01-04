@@ -9,9 +9,9 @@ export interface TTask {
   content?: string;
   // TODO
   // tasklist: TTaskListID;
-  parent: TTaskID | undefined;
+  parent?: TTaskID;
   // user sorting
-  previous: TTaskID | undefined;
+  previous?: TTaskID;
   // TODO iso date ?
   created: number;
   // TODO iso date ?
@@ -87,7 +87,7 @@ export class Store {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
-  get(): TTask | null {
+  get(): TTask[] | null {
     const stored = localStorage.getItem("tasks");
     return stored ? JSON.parse(stored) : null;
   }

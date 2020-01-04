@@ -1,4 +1,5 @@
 ## Bugs
+- lodash-es breaks jest
 
 ## Milestone 1:
 c list UI
@@ -25,7 +26,8 @@ c table layout
   - drag & drop
 - left menu with task lists
 - top navbar
-- service worker
+- PWA
+  - service worker
 
 ## Milestone 2:
 + bind to the sync engine

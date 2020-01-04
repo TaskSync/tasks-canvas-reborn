@@ -1,4 +1,4 @@
-import { remove } from "lodash-es";
+import { remove } from "lodash";
 import assert from "assert";
 import uniqid from "uniqid";
 import Store, { TSelection, TTask, TTaskID } from "./store";
