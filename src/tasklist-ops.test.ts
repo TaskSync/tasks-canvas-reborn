@@ -5,17 +5,17 @@ import { sortTasks, isUserSorted } from "./tasklist-ops";
 describe("sorting", () => {
   describe("user", () => {
     const sorted: TTask[] = [
-      createTask("1"),
-      createTask("2", { parent: "1" }),
-      createTask("3", { previous: "1" }),
-      createTask("4", { previous: "3" })
+      t("1"),
+      t("1-1", { parent: "1" }),
+      t("2", { previous: "1" }),
+      t("3", { previous: "2" })
     ];
 
     const unsorted: TTask[] = [
-      createTask("2", { parent: "1" }),
-      createTask("1"),
-      createTask("3", { previous: "1" }),
-      createTask("4", { previous: "3" })
+      t("1-1", { parent: "1" }),
+      t("1"),
+      t("2", { previous: "1" }),
+      t("3", { previous: "2" })
     ];
 
     test("isUserSorted", () => {
@@ -27,11 +27,30 @@ describe("sorting", () => {
       expect(sortTasks(sorted)).toMatchObject(sorted);
       expect(sortTasks(unsorted)).toMatchObject(sorted);
     });
+
+    test("indent", () => {
+      const unsorted: TTask[] = [
+        t("1"),
+        t("1-1", { parent: "1" }),
+        t("2", { previous: "1" }),
+        t("3", { previous: "2" }),
+        t("1-2", { previous: "1-1", parent: "1" })
+      ];
+      const sorted: TTask[] = [
+        t("1"),
+        t("1-1", { parent: "1" }),
+        t("1-2", { previous: "1-1", parent: "1" }),
+        t("2", { previous: "1" }),
+        t("3", { previous: "2" })
+      ];
+      expect(sortTasks(unsorted)).toMatchObject(sorted);
+    });
   });
 });
 
+// create a task
 // text is also an ID, has to be unique
-function createTask(text: string, task?: Partial<TTask>): TTask {
+export function t(text: string, task?: Partial<TTask>): TTask {
   return {
     id: text,
     title: text,

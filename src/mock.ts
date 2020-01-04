@@ -1,29 +1,30 @@
 import { TTask, now } from "./store";
+
 export default [
   {
-    id: "id-0",
-    title: "abc",
+    id: "1 foo",
+    title: "1 foo",
     updated: now(),
     created: now()
   },
   {
-    id: "id-1",
-    parent: "id-0",
-    title: "123 456",
+    id: "1-2 foo",
+    parent: "1 foo",
+    title: "1-2 foo",
     updated: now(),
     created: now()
   },
   {
-    id: "id-2",
-    previous: "id-0",
-    title: "test 3",
+    id: "3 foo",
+    previous: "1 foo",
+    title: "3 foo",
     updated: now(),
     created: now()
   },
   {
-    id: "id-3",
-    previous: "id-2",
-    title: "test 4",
+    id: "4 foo",
+    previous: "3 foo",
+    title: "4 foo",
     updated: now(),
     created: now()
   }

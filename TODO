@@ -1,7 +1,3 @@
-## Bugs
-- lodash-es breaks jest
-  - increases the bundle size by +100kb (confirm?)
-
 ## Milestone 1:
 c list UI
   c key navigation
@@ -11,7 +7,8 @@ c table layout
   - add a new task
   - support sorting (eg by date)
   + import / export
-  - save when leaving the page
+  - save on page load
+  - save on page unload
   - tests
     - actions
     - sorting
@@ -46,3 +43,11 @@ c table layout
   - dir-like navi as /list/task
   - second panel
   - move function
+  
+## Tests
+- disable compilation errors
+
+## Optimization
+- use lodash-es
+  - breaks `jest`
+  - increases the bundle size by +100kb (confirm?)
