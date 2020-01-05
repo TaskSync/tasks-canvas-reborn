@@ -8,6 +8,7 @@
     "build:prod": "yarn set-build:prod; parcel build --out-dir dist/build src/index.html",
     "build:compat": "yarn set-build:compat; parcel build --out-dir dist/build-compat src/index.html",
     "start": "parcel src/index.html",
+    "deploy": "yarn build:prod; now deploy dist/build --name canvas --prod",
     "test": "jest"
   },
   "name": "tasks-canvas-reborn",
