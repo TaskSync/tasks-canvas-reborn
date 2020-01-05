@@ -24,9 +24,9 @@ function Task({
 
   const checkboxNode = (
     <Checkbox
+      data-checkbox="true"
       checked={task.isCompleted}
       className={classes.checkbox}
-      edge="start"
       tabIndex={-1}
       disableRipple
       inputProps={{ "aria-labelledby": labelId }}
@@ -41,8 +41,12 @@ function Task({
 
   return (
     <tr data-id={id} className={classes.row}>
-      <td className={checkboxCellClasses}>{!task.parent ? checkboxNode : null}</td>
-      {task.parent ? <td className={checkboxCellClasses}>{checkboxNode}</td> : null}
+      <td className={checkboxCellClasses}>
+        {!task.parent ? checkboxNode : null}
+      </td>
+      {task.parent ? (
+        <td className={checkboxCellClasses}>{checkboxNode}</td>
+      ) : null}
       <td
         colSpan={task.parent ? 1 : 2}
         className={classnames(

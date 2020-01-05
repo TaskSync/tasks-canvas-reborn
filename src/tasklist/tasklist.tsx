@@ -169,9 +169,10 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       }
       // reset undo bc of an action
       resetUndoCounters();
-    } else if (event.key === "Enter") {
-      // NEWLINE
+    }
 
+    // NEWLINE
+    else if (event.key === "Enter") {
       // break a task into two (or start a new one)
       event.preventDefault();
       createRevision();
@@ -301,33 +302,56 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
   }
 
+  // used to identify a (delegated) click on one-of-many-and-all nodes
+  // composing a material-ui checkbox
+  function isCheckbox(target: HTMLElement, root: HTMLElement): boolean {
+    if (target?.tagName?.toLowerCase() === "input") {
+      return true;
+    }
+
+    let node = target;
+    do {
+      if (node?.tagName?.toLowerCase() === "input") {
+        return true;
+      } else if (node?.dataset.checkbox) {
+        return true;
+      }
+      node = node?.parentElement || target;
+    } while (node && node !== root);
+
+    return false;
+  }
+
   function handleClick(event: MouseEvent<HTMLElement>) {
     const id = getDataID(event);
     const target = event.target as HTMLElement;
 
-    // persist selection
+    // persist the selection
     // hooks get updated in the next re-render, so take the newest selection
     const selection = persistSelection(id, target);
 
     // CHECKBOX
-    if (target?.tagName?.toLowerCase() === "input") {
+    if (isCheckbox(target, event.currentTarget)) {
       const input = target as HTMLInputElement;
-      // save changes (if any)
-      dispatchList({
-        type: "update",
-        store,
-        id,
-        title: target.textContent || "",
-        selection
-      });
+      // save changes (if any) using a refNode
+      if (nodeRefs[id]) {
+        dispatchList({
+          type: "update",
+          store,
+          id,
+          title: nodeRefs[id].textContent || "",
+          selection
+        });
+      }
       // flip the checkbox
       dispatchList({
         type: "completed",
         id,
-        completed: input.checked,
+        completed: !input.checked,
         store,
         selection
       });
+      event.preventDefault();
     }
 
     // undo for switching tasks
