@@ -19,9 +19,28 @@ import useStyles from "./styles";
 import Task from "./task";
 import { getSelection } from "./utils";
 
-function tasksReducer(state: TTask[], action: TAction) {
-  // @ts-ignore TODO type
-  return ops[action.type](state, action);
+function tasksReducer(state: TTask[], action: TAction): TTask[] {
+  switch (action.type) {
+    case "completed":
+      return ops.completed(state, action);
+    case "indent":
+      return ops.indent(state, action);
+    case "mergePrevLine":
+      // @ts-ignore TODO TS bug
+      return ops.mergePrevLine(state, action);
+    case "newline":
+      return ops.newline(state, action);
+    case "outdent":
+      return ops.outdent(state, action);
+    case "redo":
+      // @ts-ignore TODO TS bug
+      return ops.redo(state, action);
+    case "undo":
+      return ops.undo(state, action);
+    case "update":
+      return ops.update(state, action);
+  }
+  return state;
 }
 
 function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
@@ -74,7 +93,9 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   // HELPERS
 
   function getTaskByID(id: string): TTask {
-    return list.find((task: TTask) => task.id === id);
+    const task = list.find((task: TTask) => task.id === id);
+    assert(task, `task ${id} not found`);
+    return task!;
   }
 
   function resetUndoCounters() {
