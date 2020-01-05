@@ -85,12 +85,20 @@ export class Store {
     this.addRev(tasks, focusedID, selection);
     // persist
     // TODO use the tasklist's id
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+    this.setLocalStorage("tasks", tasks);
+  }
+
+  protected setLocalStorage(name: string, tasks: TTask[]) {
+    localStorage.setItem(name, JSON.stringify(tasks));
   }
 
   get(): TTask[] | null {
     // TODO use the tasklist's id
-    const stored = localStorage.getItem("tasks");
+    return this.getLocalStorage("tasks");
+  }
+
+  protected getLocalStorage(name: string): TTask[] | null {
+    const stored = localStorage.getItem(name);
     return stored ? JSON.parse(stored) : null;
   }
 }
