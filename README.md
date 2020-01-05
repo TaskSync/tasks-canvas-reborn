@@ -15,7 +15,7 @@ this one tries to be as close to the original as possible, with additional featu
 
 URL: [canvas.taskbot.app](https://canvas.taskbot.app)
 
-Please [report issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/new).
+Please [report any issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/new).
 
 ![screenshot](https://tasksync.github.io/tasks-canvas-reborn/screenshot.png)
 
@@ -35,8 +35,8 @@ Please [report issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/ne
 - task lists
 - syncing with Google Tasks API (using the [TaskBot's engine](https://github.com/TaskSync/TaskBot.app))
 - conflict resolution
-- import / export (JSON)
-- dialogs
+- import / export (JSON, markdown)
+- edit dialog
 - sorting
 - drag & drop
 - PWA
@@ -47,6 +47,7 @@ Please [report issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/ne
 
 - React
 - Material UI
+- TypeScript
 - `contentEditable`
 - [mucho testos](src/tasklist/actions.test.ts)
 

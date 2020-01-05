@@ -10,13 +10,12 @@ c table layout
   c support undo
   - add a new task
   - support sorting (eg by date)
-  + import / export
   - save on page load
   - save on page unload
   - tests
     - actions
     - sorting
-- logging system
++ logging system
 - other shortcuts
   - get the original ones
   - bind
@@ -24,6 +23,10 @@ c table layout
 - edit dialog
   - title
   - content
+  - due date
++ import / export
+  + JSON
+  - markdown
 - moving tasks
   - keyboard
   - drag & drop
