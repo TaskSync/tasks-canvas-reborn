@@ -11,6 +11,9 @@ import {
 } from "./actions-helpers";
 import { sortTasks } from "./sorting";
 import Store, { TSelection, TTask, TTaskID, now } from "./store";
+import debug from "debug";
+
+const log = debug("canvas");
 
 // types
 
@@ -82,7 +85,7 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
   task.title = action.title;
   task.updated = now();
 
-  console.log(`updated ${action.id} with`, task.title);
+  log(`updated ${action.id} with`, task.title);
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
@@ -129,7 +132,7 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
     child.parent = newParent.id;
   }
 
-  console.log(`indent ${action.id}`);
+  log(`indent ${action.id}`);
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
@@ -167,7 +170,7 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
     nextOnRootLevel.previous = lastSibling?.id || task.id;
   }
 
-  console.log(`outdent ${action.id}`);
+  log(`outdent ${action.id}`);
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
@@ -185,7 +188,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
   const task1Title = task.title.slice(0, action.selection[0]).trim();
   const task2Title = task.title.slice(action.selection[1]).trim();
 
-  console.log(`newline`, action.id);
+  log(`newline`, action.id);
 
   // TODO extract the factory
   const task2: TTask = {
@@ -239,7 +242,7 @@ export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
     return tasks;
   }
   previous = previous!;
-  console.log(`mergePrevLine`, id);
+  log(`mergePrevLine`, id);
 
   // MODIFY
 
@@ -250,7 +253,7 @@ export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
   const caret = previous.title.length - task.title.length - 1;
   action.setSelection([caret, caret]);
 
-  setPrevious(id, undefined, tasks)
+  setPrevious(id, undefined, tasks);
   tasks = tasks.filter((t: TTask) => t.id !== id);
 
   const ret = sortTasks(tasks);
@@ -264,7 +267,7 @@ export function completed(tasks: TTask[], action: TCompleted): TTask[] {
   // modify
   task.isCompleted = action.completed;
 
-  console.log(`completed`, task.id, action.completed);
+  log(`completed`, task.id, action.completed);
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
@@ -280,7 +283,7 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
   let task = rev.tasks.find(t => t.id === rev.focusedID);
   assert(task);
   task = task!;
-  console.log("undo", task.title, rev.selection);
+  log("undo", task.title, rev.selection);
 
   // restore the focus
   action.setSelection(rev.selection);
@@ -301,7 +304,7 @@ export function redo(tasks: TTask[], action: TUndo): TTask[] {
   let task = rev.tasks.find(t => t.id === rev.focusedID);
   assert(task);
   task = task!;
-  console.log("redo", rev?.focusedID, rev?.selection);
+  log("redo", rev?.focusedID, rev?.selection);
 
   // restore the focus
   action.setSelection(rev.selection);

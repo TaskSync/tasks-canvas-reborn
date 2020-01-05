@@ -1,12 +1,40 @@
 import assert from "assert";
-import { newline, TNewline } from "./actions";
+import { newline, TNewline, TIndent, indent, TAction } from "./actions";
 import { TTask, now, TTaskID, TSelection } from "./store";
 import MockStore from "./store.mock";
 
+// debugger
+
 describe("actions", () => {
+  // mock
+  const store = new MockStore();
+
+  function testStructure(
+    action: (tasks: TTask[], action: TAction) => TTask[],
+    actionData: Partial<TAction>
+  ) {
+    return function(
+      _: string,
+      input: string,
+      output: string,
+      id: string,
+      selection: TSelection
+    ) {
+      const tasks = factory(input);
+      const expected = normalize(output);
+      // @ts-ignore
+      const after = action(tasks, {
+        id,
+        selection,
+        ...actionData
+      });
+      expect(tasksToString(after)).toEqual(expected);
+    };
+  }
+
   describe("newline", () => {
-    const store = new MockStore();
-    const actionMock: Pick<
+    // mock
+    const newlineMock: Pick<
       TNewline,
       "setFocusedID" | "setSelection" | "type" | "store"
     > = {
@@ -15,25 +43,273 @@ describe("actions", () => {
       type: "newline",
       store
     };
-    test("first child", () => {
-      const tasks = factory(`
-      - 1
-      -- 1-2
-      - 2
-      `);
-      const expected = normalize(`
-      - 1
-      -- 1
-      -- 2
-      - 2
-      `);
-      const after = newline(tasks, {
-        id: "1-2",
-        selection: [1, 2],
-        ...actionMock
-      });
-      expect(tasksToString(after)).toEqual(expected);
-    });
+
+    const tests = [
+      [
+        "fist root",
+        // input
+        `- 1
+         - 2`,
+        // output
+        `- 1
+         - 
+         - 2`,
+        // id
+        "1",
+        // selection
+        [1, 1]
+      ],
+
+      [
+        "middle root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 2
+         - 
+         - 3`,
+        // id
+        "2",
+        // selection
+        [1, 1]
+      ],
+
+      [
+        "last root",
+        // input
+        `- 1
+         - 2`,
+        // output
+        `- 1
+         - 2
+         - `,
+        // id
+        "2",
+        // selection
+        [1, 1]
+      ],
+
+      [
+        "first child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1
+         -- 1
+         -- 1-2
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [1, 2]
+      ],
+
+      [
+        "middle child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         -- 1-3
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         -- 1
+         -- 2
+         -- 1-3
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [1, 2]
+      ],
+
+      [
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         -- 1
+         -- 2
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [1, 2]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(newline, newlineMock)
+    );
+  });
+
+  describe("indent", () => {
+    // mock
+    const indentMock: Pick<TIndent, "type" | "store"> = {
+      type: "indent",
+      store
+    };
+
+    const tests = [
+      [
+        // no change
+        "first root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 2
+         - 3`,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         -- 2
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 2
+         -- 3`,
+        // id
+        "3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        // no change
+        "first child",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        // no change
+        "preserve the selection",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 1]
+      ],
+
+      [
+        "with children",
+        // input
+        `- 1
+         - 2
+         -- 2-1
+         - 3`,
+        // output
+        `- 1
+         -- 2
+         -- 2-1
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 1]
+      ],
+
+      [
+        "last root with children",
+        // input
+        `- 1
+         - 2
+         -- 2-1`,
+        // output
+        `- 1
+         -- 2
+         -- 2-1`,
+        // id
+        "2",
+        // selection
+        [0, 1]
+      ],
+
+      [
+        "merge children",
+        // input
+        `- 1
+         -- 1-1
+         - 2
+         -- 2-1
+         - 3`,
+        // output
+        `- 1
+         -- 1-1
+         -- 2
+         -- 2-1
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 1]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(indent, indentMock)
+    );
   });
 });
 
@@ -46,7 +322,7 @@ export function factory(tasks: string): TTask[] {
   tasks = normalize(tasks);
 
   for (let line of tasks.split("\n")) {
-    const isChild = line[0] === "--";
+    const isChild = line.startsWith("--");
     if (isChild) {
       assert(previousRoot);
     }
@@ -54,7 +330,7 @@ export function factory(tasks: string): TTask[] {
     const attrs: Partial<TTask> = isChild
       ? { parent: previousRoot, previous: previousChild }
       : { previous: previousRoot };
-    const title = line.replace(/^-+/, "");
+    const title = line.replace(/^-+ /, "");
 
     const task = t(title, attrs);
 
@@ -72,7 +348,7 @@ export function factory(tasks: string): TTask[] {
 export function tasksToString(tasks: TTask[]): string {
   let ret = "";
   for (const task of tasks) {
-    ret += task.parent ? "--" : "-";
+    ret += task.parent ? "-- " : "- ";
     ret += task.title + "\n";
   }
   return ret.trim();
@@ -84,7 +360,8 @@ export function normalize(tasks: string): string {
     if (!line.trim()) {
       continue;
     }
-    ret += line.trim() + "\n";
+    // always keep a space after a `-`
+    ret += line.trim().replace(/^(--?)\s?/, "$1 ") + "\n";
   }
   return ret.trim();
 }

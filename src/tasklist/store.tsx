@@ -1,5 +1,8 @@
 // @ts-ignore
 import deepcopy from "deepcopy";
+import debug from "debug";
+
+const log = debug("canvas");
 
 export type TTaskID = string;
 
@@ -41,7 +44,7 @@ export class Store {
   revPointer: number | undefined = undefined;
 
   addRev(tasks: TTask[], focusedID: string, selection: TSelection) {
-    console.log("add rev", focusedID, selection);
+    log("add rev", focusedID, selection);
     this.revs.unshift({
       tasks: deepcopy(tasks),
       focusedID,

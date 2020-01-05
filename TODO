@@ -1,3 +1,5 @@
+# Desktop
+
 ## BUGS
 
 ## Milestone 1:
@@ -46,11 +48,21 @@ c table layout
   - dir-like navi as /list/task
   - second panel
   - move function
-  
-## Tests
-- disable compilation errors
 
 ## Optimization
 - use lodash-es
   - breaks `jest`
-  - increases the bundle size by +100kb (confirm?)
+  - increases the bundle size by +100kb
+
+# Mobile
+
+## BUGS
+- newline has a wrong selection on (ios)
+- keyboard caret dragging doesnt change the focused task (ios)
+
+# Dev
+
+## Tests
+- selection helpers (mostly for undo)
+- disable compilation errors
+- tests for helpers

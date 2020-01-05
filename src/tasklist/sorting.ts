@@ -1,5 +1,8 @@
 import assert from "assert";
 import { TTask, TTaskID } from "./store";
+import debug from "debug";
+
+const log = debug("canvas");
 
 /**
  * Sorts and returns a new array.
@@ -16,7 +19,7 @@ export function sortTasks(
     if (isUserSorted(tasks)) {
       return [...tasks];
     }
-    console.log("sorting by user");
+    log("sorting by user");
 
     // find the first task
     let first: TTask | undefined = tasks.find(
