@@ -30,7 +30,6 @@ export type TAction =
 // per-task actions
 export type TUpdate = {
   type: "update";
-  id: string;
   title: string;
 } & TTaskActionBase;
 export type TIndent = { type: "indent" } & TTaskActionBase;
@@ -41,13 +40,11 @@ export type TCompleted = {
 } & TTaskActionBase;
 export type TNewline = {
   type: "newline";
-  id: string;
   setFocusedID(id: TTaskID): void;
   setSelection(selection: TSelection): void;
 } & TTaskActionBase;
 export type TMergePrevLine = {
   type: "mergePrevLine";
-  id: string;
   setFocusedID(id: TTaskID): void;
   setSelection(selection: TSelection): void;
 } & TTaskActionBase;
@@ -71,12 +68,9 @@ export type TUndoBase = {
   store: Store;
 };
 
-// TODO bump the updated field on every action
-
 export function update(tasks: TTask[], action: TUpdate): TTask[] {
-  let task = tasks.find(task => task.id === action.id);
-  assert(task);
-  task = task!;
+  const task = getTaskByID(action.id, tasks);
+
   if (task.title === action.title) {
     return tasks;
   }
@@ -130,6 +124,7 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
       firstChild = false;
     }
     child.parent = newParent.id;
+    child.updated = now();
   }
 
   log(`indent ${action.id}`);
@@ -202,6 +197,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
   // modify
   task.title = task1Title;
+  task.updated = now();
   const hasChildren = getChildren(task.id, tasks).length;
 
   // root level parent task
@@ -232,7 +228,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 }
 
 // merges two tasks into one after Backspace on the line beginning
-export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
+export function mergePrevLine(tasks: TTask[], action: TMergePrevLine): TTask[] {
   const { id } = action;
   const task = getTaskByID(id, tasks);
   let previous = getVisiblePrevious(id, tasks);
@@ -247,6 +243,7 @@ export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
   // MODIFY
 
   previous.title += " " + task.title;
+  previous.updated = now();
 
   action.setFocusedID(previous.id);
   // place the caret in between the merged titles
@@ -266,6 +263,7 @@ export function completed(tasks: TTask[], action: TCompleted): TTask[] {
 
   // modify
   task.isCompleted = action.completed;
+  task.updated = now();
 
   log(`completed`, task.id, action.completed);
   const ret = sortTasks(tasks);
@@ -294,7 +292,7 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
   return rev.tasks;
 }
 
-export function redo(tasks: TTask[], action: TUndo): TTask[] {
+export function redo(tasks: TTask[], action: TRedo): TTask[] {
   const rev = action.store.redo();
   // no more redos
   if (!rev) {

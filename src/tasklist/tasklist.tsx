@@ -11,7 +11,7 @@ import React, {
 } from "react";
 // @ts-ignore
 import { setRange } from "selection-ranges";
-import * as ops from "./actions";
+import * as actions from "./actions";
 import { TAction } from "./actions";
 import { getChildren } from "./actions-helpers";
 import { Store, TTask, TTaskID, TSelection } from "./store";
@@ -22,23 +22,21 @@ import { getSelection } from "./utils";
 function tasksReducer(state: TTask[], action: TAction): TTask[] {
   switch (action.type) {
     case "completed":
-      return ops.completed(state, action);
+      return actions.completed(state, action);
     case "indent":
-      return ops.indent(state, action);
+      return actions.indent(state, action);
     case "mergePrevLine":
-      // @ts-ignore TODO TS bug
-      return ops.mergePrevLine(state, action);
+      return actions.mergePrevLine(state, action);
     case "newline":
-      return ops.newline(state, action);
+      return actions.newline(state, action);
     case "outdent":
-      return ops.outdent(state, action);
+      return actions.outdent(state, action);
     case "redo":
-      // @ts-ignore TODO TS bug
-      return ops.redo(state, action);
+      return actions.redo(state, action);
     case "undo":
-      return ops.undo(state, action);
+      return actions.undo(state, action);
     case "update":
-      return ops.update(state, action);
+      return actions.update(state, action);
   }
   return state;
 }

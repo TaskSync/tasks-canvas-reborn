@@ -1,5 +1,15 @@
 import assert from "assert";
-import { newline, TNewline, TIndent, indent, TAction } from "./actions";
+import {
+  newline,
+  TNewline,
+  TIndent,
+  indent,
+  TAction,
+  TOutdent,
+  outdent,
+  TMergePrevLine,
+  mergePrevLine
+} from "./actions";
 import { TTask, now, TTaskID, TSelection } from "./store";
 import MockStore from "./store.mock";
 
@@ -17,7 +27,7 @@ describe("actions", () => {
       _: string,
       input: string,
       output: string,
-      id: string,
+      id: TTaskID,
       selection: TSelection
     ) {
       const tasks = factory(input);
@@ -31,6 +41,12 @@ describe("actions", () => {
       expect(tasksToString(after)).toEqual(expected);
     };
   }
+
+  // basic task list for no-change cases
+  const oneTwoThree = `
+    - 1
+    - 2
+    - 3`;
 
   describe("newline", () => {
     // mock
@@ -168,16 +184,12 @@ describe("actions", () => {
 
     const tests = [
       [
-        // no change
+        // no-change
         "first root",
         // input
-        `- 1
-         - 2
-         - 3`,
+        oneTwoThree,
         // output
-        `- 1
-         - 2
-         - 3`,
+        oneTwoThree,
         // id
         "1",
         // selection
@@ -217,7 +229,7 @@ describe("actions", () => {
       ],
 
       [
-        // no change
+        // no-change
         "first child",
         // input
         `- 1
@@ -234,7 +246,26 @@ describe("actions", () => {
       ],
 
       [
-        // no change
+        // no-change
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        // no-change
         "preserve the selection",
         // input
         `- 1
@@ -311,9 +342,277 @@ describe("actions", () => {
       testStructure(indent, indentMock)
     );
   });
+
+  describe("outdent", () => {
+    // mock
+    const outdentMock: Pick<TOutdent, "type" | "store"> = {
+      type: "outdent",
+      store
+    };
+
+    const tests = [
+      [
+        // no-change
+        "first root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "only child",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1
+         - 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "first child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         - 1-1
+         - 1-2
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         - 1-2
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last child on the list",
+        // input
+        `- 1
+         -- 1-1`,
+        // output
+        `- 1
+         - 1-1`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(outdent, outdentMock)
+    );
+  });
+
+  describe("mergePrevLine", () => {
+    // mock
+    const mergePrevLineMock: Pick<
+      TMergePrevLine,
+      "type" | "store" | "setFocusedID" | "setSelection"
+    > = {
+      type: "mergePrevLine",
+      store,
+      setFocusedID(_: TTaskID) {},
+      setSelection(_: TSelection) {}
+    };
+
+    const tests = [
+      [
+        // no-change
+        "first root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1 2
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 2 3`,
+        // id
+        "3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "only child",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         -- 1-3
+         - 2`,
+        // output
+        `- 1 
+         -- 1-1 1-2
+         -- 1-3
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         -- 1-3
+         - 2`,
+        // output
+        `- 1 
+         -- 1-1
+         -- 1-2 1-3
+         - 2`,
+        // id
+        "1-3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "root merges a previous child",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1 
+         -- 1-1 2`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(mergePrevLine, mergePrevLineMock)
+    );
+  });
+
+  describe.skip("update", () => {
+    // TODO
+  });
+
+  describe.skip("completed", () => {
+    // TODO
+  });
+
+  describe.skip("undo", () => {
+    // TODO
+  });
+
+  describe.skip("redo", () => {
+    // TODO
+  });
 });
 
 // HELPERS
+// TODO support completed as `c` instead of `-`
 
 export function factory(tasks: string): TTask[] {
   let previousRoot: TTaskID | undefined;
