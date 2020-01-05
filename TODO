@@ -15,6 +15,7 @@ c table layout
   - tests
     - actions
     - sorting
+- logging system
 - other shortcuts
   - get the original ones
   - bind

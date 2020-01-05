@@ -1,5 +1,4 @@
 import assert from "assert";
-import { remove } from "lodash";
 import uniqid from "uniqid";
 import {
   getNext,
@@ -113,9 +112,9 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
   // place after the last child of the previous one
   if (previousChildren.length) {
     const last = previousChildren[previousChildren.length - 1];
-    setPrevious(task.id, tasks, last.id);
+    setPrevious(task.id, last.id, tasks);
   } else {
-    setPrevious(task.id, tasks, undefined);
+    setPrevious(task.id, undefined, tasks);
   }
   task.parent = newParent.id;
   task.updated = now();
@@ -183,8 +182,8 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
 export function newline(tasks: TTask[], action: TNewline): TTask[] {
   const task = getTaskByID(action.id, tasks);
 
-  const task1Title = task.title.slice(0, action.selection[0]);
-  const task2Title = task.title.slice(action.selection[1]);
+  const task1Title = task.title.slice(0, action.selection[0]).trim();
+  const task2Title = task.title.slice(action.selection[1]).trim();
 
   console.log(`newline`, action.id);
 
@@ -231,29 +230,31 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
 // merges two tasks into one after Backspace on the line beginning
 export function mergePrevLine(tasks: TTask[], action: TNewline): TTask[] {
-  const taskToDelete = getTaskByID(action.id, tasks);
+  const { id } = action;
+  const task = getTaskByID(id, tasks);
+  let previous = getVisiblePrevious(id, tasks);
 
-  const indexToDelete = tasks.indexOf(taskToDelete);
   // dont merge-up the first task
-  if (indexToDelete === 0) {
+  if (!previous) {
     return tasks;
   }
+  previous = previous!;
+  console.log(`mergePrevLine`, id);
 
-  // modify
-  console.log(`mergePrevLine`, taskToDelete, indexToDelete);
+  // MODIFY
 
-  const previous = tasks[indexToDelete - 1];
-  previous.title += " " + taskToDelete.title;
+  previous.title += " " + task.title;
 
   action.setFocusedID(previous.id);
   // place the caret in between the merged titles
-  const caret = previous.title.length - taskToDelete.title.length - 1;
+  const caret = previous.title.length - task.title.length - 1;
   action.setSelection([caret, caret]);
 
-  tasks = remove(tasks, (t: TTask) => t.id === taskToDelete.id);
-  const ret = sortTasks(tasks);
+  setPrevious(id, undefined, tasks)
+  tasks = tasks.filter((t: TTask) => t.id !== id);
 
-  action.store.set(ret, action.id, action.selection);
+  const ret = sortTasks(tasks);
+  action.store.set(ret, id, action.selection);
   return ret;
 }
 

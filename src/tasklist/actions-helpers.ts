@@ -97,12 +97,12 @@ export function getVisibleNext(
  */
 export function setPrevious(
   id: TTaskID,
-  tasks: TTask[],
-  previous: TTaskID | undefined
+  previous: TTaskID | undefined,
+  tasks: TTask[]
 ) {
   const task = getTaskByID(id, tasks);
   const next = getNext(id, tasks);
-  // keep the one-way-linked-list consistent
+  // keep the left-linked list consistent
   if (next) {
     next.previous = task.previous;
   }
