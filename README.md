@@ -25,18 +25,29 @@ Please [report issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/ne
 
 - list layout
 - keyboard navigation
-- simple actions (edit, split, merge, indent, outdent)
+- simple actions (complete, edit, split, merge, indent, outdent)
 - persisting in localStorage
-- undo / redo
+- undo / redo (structural)
 
 ### TODO
 
-- sycing with Google Tasks API (using the [TaskBot's engine](https://github.com/TaskSync/TaskBot.app))
+- missing shortcuts
+- task lists
+- syncing with Google Tasks API (using the [TaskBot's engine](https://github.com/TaskSync/TaskBot.app))
 - conflict resolution
 - import / export (JSON)
-- task lists
 - dialogs
 - sorting
 - drag & drop
 - PWA
-- ...more in [TODO](https://github.com/TaskSync/tasks-canvas-reborn/blob/master/TODO)
+- mobile compat
+- ...more in [TODO](TODO)
+
+## How
+
+- React
+- Material UI
+- `contentEditable`
+- [mucho testos](src/tasklist/actions.test.ts)
+
+Pull requests welcome :)
