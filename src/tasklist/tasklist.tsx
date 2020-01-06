@@ -13,12 +13,15 @@ import React, {
 import { setRange } from "selection-ranges";
 import * as actions from "./actions";
 import { TAction } from "./actions";
-import { getChildren } from "./actions-helpers";
-import { Store, TTask, TTaskID, TSelection, createTask } from "./store";
+import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
+import { Store } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
-import { getSelection } from "./utils";
+import { getSelection, isMacOS } from "./utils";
 import { useBeforeunload } from "react-beforeunload";
+import debug from "debug";
+
+const log = debug("canvas");
 
 function tasksReducer(state: TTask[], action: TAction): TTask[] {
   switch (action.type) {
@@ -38,6 +41,10 @@ function tasksReducer(state: TTask[], action: TAction): TTask[] {
       return actions.undo(state, action);
     case "update":
       return actions.update(state, action);
+    case "moveUp":
+      return actions.moveUp(state, action);
+    case "moveDown":
+      return actions.moveDown(state, action);
   }
   return state;
 }
@@ -117,7 +124,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   }
 
   function resetUndoCounters() {
-    console.log("resetUndoCounters");
+    log("resetUndoCounters");
     setCharsSinceUndo(0);
     if (undoTimer !== undefined) {
       clearTimeout(undoTimer);
@@ -134,7 +141,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const selection = getSelection(node);
     if (selection !== undefined) {
       setSelection(selection);
-      console.log("persistSelection", id, selection);
+      log("persistSelection", id, selection);
     }
     return selection || def;
   }
@@ -156,7 +163,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
     // always save text before performing other action
     function createRevision() {
-      console.log("createRevision");
+      log("createRevision");
       dispatchList({
         type: "update",
         store,
@@ -179,21 +186,36 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       event.metaKey;
 
     // SWITCH TASKS
-    if (["ArrowDown", "ArrowUp"].includes(event.key)) {
+    if (["ArrowDown", "ArrowUp"].includes(event.key) && !isModifierKey(event)) {
       const index = list.indexOf(task);
-      let indexChanged;
+      let newIndex;
       // navigate between tasks
       if (event.key === "ArrowDown") {
         // move down
-        indexChanged = Math.min(index + 1, list.length - 1);
+        newIndex = Math.min(index + 1, list.length - 1);
       } else {
         // move up
-        indexChanged = Math.max(index - 1, 0);
+        newIndex = Math.max(index - 1, 0);
       }
-      setFocusedID(list[indexChanged].id);
+      const id = list[newIndex].id;
+      if (focusedID !== id) {
+        // collapse the selection
+        setSelection([selection[1], selection[1]]);
+        setFocusedID(list[newIndex].id);
+      }
       event.preventDefault();
-      // reset undo bc of an action
-      resetUndoCounters();
+    }
+
+    // MOVE
+    else if (
+      ["ArrowDown", "ArrowUp"].includes(event.key) &&
+      isModifierKey(event)
+    ) {
+      if (event.key === "ArrowUp") {
+        dispatchList({ type: "moveUp", id, store, selection: selection });
+      } else {
+        dispatchList({ type: "moveDown", id, store, selection: selection });
+      }
     }
 
     // INDENT OUTDENT
@@ -205,8 +227,6 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       } else {
         dispatchList({ type: "indent", id, store, selection: selection });
       }
-      // reset undo bc of an action
-      resetUndoCounters();
     }
 
     // NEWLINE
@@ -222,8 +242,6 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
         setFocusedID,
         setSelection
       });
-      // reset undo bc of an action
-      resetUndoCounters();
     }
 
     // MERGE
@@ -250,8 +268,6 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     // UNDO REDO
     else if (undoPressed || redoPressed) {
       setDuringUndo(true);
-      // reset undo to avoid a fake revision
-      resetUndoCounters();
       event.preventDefault();
       if (undoPressed) {
         // always save the newest version (if changed)
@@ -264,6 +280,8 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
           setManualTaskTitle
         });
       } else {
+        // reset undo to avoid a fake revision
+        resetUndoCounters();
         dispatchList({
           type: "redo",
           store,
@@ -279,6 +297,10 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       // memorize the selection to check if it has been deleted on keyUp
       selectionBeforeTyping = selection;
     }
+  }
+
+  function isModifierKey(event: KeyboardEvent) {
+    return isMacOS() ? event.metaKey : event.ctrlKey;
   }
 
   /**
@@ -323,7 +345,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
         // handle a time-based revision
         setUndoTimer(setTimeout(createRev, store.msPerUndo));
         function createRev() {
-          console.log("undo timer");
+          log("undo timer");
           // get the newest version
           const title = nodeRefs[id].textContent || "";
           // save
@@ -400,7 +422,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   function handleBlur(event: FocusEvent<HTMLSpanElement>) {
     if (duringUndo) {
-      console.log("skipping blur bc of duringUndo");
+      log("skipping blur bc of duringUndo");
       return;
     }
     // only for content editable spans
@@ -409,7 +431,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
 
     const id = getDataID(event);
-    console.log("blur save");
+    log("blur save");
     dispatchList({
       type: "update",
       store,
@@ -431,7 +453,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       focusedNode.focus();
     }
     // restore the selection
-    // console.log("restore caret", selection);
+    // log("restore caret", selection);
     setRange(focusedNode, { start: selection[0], end: selection[1] });
   });
 
@@ -440,7 +462,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     if (!manualTaskTitle) {
       return;
     }
-    console.log("restore setTaskTitle", manualTaskTitle);
+    log("restore setTaskTitle", manualTaskTitle);
     nodeRefs[manualTaskTitle.id].textContent = manualTaskTitle.title;
     setManualTaskTitle(null);
   });

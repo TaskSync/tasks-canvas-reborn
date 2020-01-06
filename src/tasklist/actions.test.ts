@@ -8,12 +8,16 @@ import {
   TOutdent,
   outdent,
   TMergePrevLine,
-  mergePrevLine
+  mergePrevLine,
+  TMoveUp,
+  moveUp,
+  TMoveDown,
+  moveDown
 } from "./actions";
-import { TTask, now, TTaskID, TSelection } from "./store";
+import { now, TSelection, TTask, TTaskID } from "./model";
 import MockStore from "./store.mock";
 
-// debugger
+// debugger;
 
 describe("actions", () => {
   // mock
@@ -591,6 +595,318 @@ describe("actions", () => {
       "%s",
       // @ts-ignore
       testStructure(mergePrevLine, mergePrevLineMock)
+    );
+  });
+
+  describe("moveUp", () => {
+    // mock
+    const moveUpMock: Pick<TMoveUp, "type" | "store"> = {
+      type: "moveUp",
+      store
+    };
+
+    const tests = [
+      [
+        // no-change
+        "first root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 2
+         - 1
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 3
+         - 2`,
+        // id
+        "3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "first child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-2
+         -- 1-1
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         -- 1-3
+         - 2`,
+        // output
+        `- 1
+         -- 1-2
+         -- 1-1
+         -- 1-3
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "over children",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2
+         - 3`,
+        // output
+        `- 2
+         - 1
+         -- 1-1
+         -- 1-2
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "with children",
+        // input
+        `- 1
+         - 2
+         -- 2-1
+         -- 2-2
+         - 3`,
+        // output
+        `- 2
+         -- 2-1
+         -- 2-2
+         - 1
+         - 3`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(moveUp, moveUpMock)
+    );
+  });
+
+  describe("moveDown", () => {
+    // mock
+    const moveDownMock: Pick<TMoveDown, "type" | "store"> = {
+      type: "moveDown",
+      store
+    };
+
+    const tests = [
+      [
+        "first root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 2
+         - 1
+         - 3`,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle root",
+        // input
+        `- 1
+         - 2
+         - 3`,
+        // output
+        `- 1
+         - 3
+         - 2`,
+        // id
+        "2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        // no-change
+        "last root",
+        // input
+        oneTwoThree,
+        // output
+        oneTwoThree,
+        // id
+        "3",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "first child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2`,
+        // output
+        `- 1
+         -- 1-2
+         -- 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "last child",
+        // input
+        `- 1
+         -- 1-1
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         - 2`,
+        // id
+        "1-1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "middle child",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         -- 1-3
+         - 2`,
+        // output
+        `- 1
+         -- 1-1
+         -- 1-3
+         -- 1-2
+         - 2`,
+        // id
+        "1-2",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "over children",
+        // input
+        `- 1
+         - 2
+         -- 2-1
+         -- 2-2
+         - 3`,
+        // output
+        `- 2
+         -- 2-1
+         -- 2-2
+         - 1
+         - 3`,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ],
+
+      [
+        "with children",
+        // input
+        `- 1
+         -- 1-1
+         -- 1-2
+         - 2
+         - 3`,
+        // output
+        `- 2
+         - 1
+         -- 1-1
+         -- 1-2
+         - 3`,
+        // id
+        "1",
+        // selection
+        [0, 0]
+      ]
+    ];
+
+    test.each(tests)(
+      "%s",
+      // @ts-ignore
+      testStructure(moveDown, moveDownMock)
     );
   });
 

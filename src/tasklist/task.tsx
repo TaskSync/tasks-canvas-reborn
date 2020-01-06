@@ -3,7 +3,7 @@ import Checkbox from "@material-ui/core/es/Checkbox";
 import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
 import classnames from "classnames";
 import React from "react";
-import { TTask, TTaskID } from "./store";
+import { TTask, TTaskID } from "./model";
 import useStyles from "./styles";
 
 function Task({

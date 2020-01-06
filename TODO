@@ -2,6 +2,7 @@
 
 ## BUGS
 - focus leaves a contentEditable after clicking on TS's border
+- undo seems to loop
 
 ## Milestone 1:
 c list UI
@@ -15,8 +16,8 @@ c local storage backend
   c tests
     c actions
     c sorting
-+ logging system
-- moving tasks
+c logging system
++ moving tasks
 - other shortcuts
   - get the original ones
   - OS-depended differences
@@ -26,12 +27,13 @@ c local storage backend
   - title
   - content
   - due date
-- sorting
-  - date
-  - completion
+- render attrs on the list view
+  - notes
+  - duedate
 + import / export
   + JSON
   - markdown
+  - print
 - drag & drop
   - moving on the list
   - moving between lists
@@ -46,6 +48,11 @@ c local storage backend
   - new JSON merge source
   - client side google auth 
 - show hidden / deleted tasks
+- group by due dates (flat view)
+  - fold / unfold a group
+  - moving up / down changes the due date by 1d
+- modern theme
+  - http://richwells.me/better-google-tasks/
 
 ## Milestone 3:
 - Navigation mode (modal)
@@ -66,7 +73,7 @@ c local storage backend
 # Mobile
 
 ## BUGS
-- newline has a wrong selection on (ios)
+- newline has a wrong selection position (ios)
 - keyboard caret dragging doesnt change the focused task (ios)
 
 # Dev

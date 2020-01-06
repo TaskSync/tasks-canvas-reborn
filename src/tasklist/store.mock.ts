@@ -1,6 +1,7 @@
 // @ts-ignore
 import deepcopy from "deepcopy";
-import Store, { TTask } from "./store";
+import { TTask } from "./model";
+import Store from "./store";
 
 class MockStore extends Store {
   localStorage: { [name: string]: TTask[] } = {};

@@ -1,5 +1,5 @@
+import { now, TTask } from "./model";
 import { isUserSorted, sortTasks } from "./sorting";
-import { TTask, now } from "./store";
 
 describe("sorting", () => {
   describe("user", () => {

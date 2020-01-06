@@ -1,35 +1,9 @@
+import debug from "debug";
 // @ts-ignore
 import deepcopy from "deepcopy";
-import debug from "debug";
-import uniqid from "uniqid";
+import { TSelection, TRev, TTask } from "./model";
 
 const log = debug("canvas");
-
-export type TTaskID = string;
-
-export type TTask = {
-  id: TTaskID;
-  title: string;
-  content?: string;
-  // TODO
-  // tasklist: TTaskListID;
-  parent?: TTaskID;
-  // user sorting
-  previous?: TTaskID;
-  // TODO iso date ?
-  created: number;
-  // TODO iso date ?
-  updated: number;
-  isCompleted?: boolean;
-};
-
-export type TRev = {
-  tasks: TTask[];
-  focusedID: string;
-  selection: TSelection;
-};
-
-export type TSelection = [number, number];
 
 export class Store {
   // old revisions for undo, newest at the front (unshifted)
@@ -105,24 +79,6 @@ export class Store {
     const stored = localStorage.getItem(name);
     return stored ? JSON.parse(stored) : null;
   }
-}
-
-// TODO iso date?
-export function now(): number {
-  return Date.now();
-}
-
-export function createTask(task: Partial<TTask> = {}): TTask {
-  const defaults = {
-    id: uniqid(),
-    title: "",
-    created: now(),
-    updated: now()
-  };
-  return {
-    ...defaults,
-    ...task
-  };
 }
 
 export default Store;

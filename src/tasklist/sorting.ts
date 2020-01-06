@@ -1,6 +1,6 @@
 import assert from "assert";
-import { TTask, TTaskID } from "./store";
 import debug from "debug";
+import { TTask, TTaskID } from "./model";
 
 const log = debug("canvas");
 

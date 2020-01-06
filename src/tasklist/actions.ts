@@ -1,5 +1,5 @@
 import assert from "assert";
-import uniqid from "uniqid";
+import debug from "debug";
 import {
   getNext,
   setPrevious,
@@ -7,11 +7,15 @@ import {
   getSiblings,
   getTaskByID,
   getFirstChild,
-  getChildren
-} from "./actions-helpers";
+  getChildren,
+  createTask,
+  now,
+  TSelection,
+  TTask,
+  TTaskID, getVisibleNext
+} from "./model";
 import { sortTasks } from "./sorting";
-import Store, { TSelection, TTask, TTaskID, now, createTask } from "./store";
-import debug from "debug";
+import Store from "./store";
 
 const log = debug("canvas");
 
@@ -25,7 +29,9 @@ export type TAction =
   | TOutdent
   | TUndo
   | TRedo
-  | TMergePrevLine;
+  | TMergePrevLine
+  | TMoveUp
+  | TMoveDown;
 
 // per-task actions
 export type TUpdate = {
@@ -33,6 +39,8 @@ export type TUpdate = {
   title: string;
 } & TTaskActionBase;
 export type TIndent = { type: "indent" } & TTaskActionBase;
+export type TMoveUp = { type: "moveUp" } & TTaskActionBase;
+export type TMoveDown = { type: "moveDown" } & TTaskActionBase;
 export type TOutdent = { type: "outdent" } & TTaskActionBase;
 export type TCompleted = {
   type: "completed";
@@ -150,7 +158,7 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
   // become the parent of next (visible) child siblings
   let lastSibling;
   if (rightSiblings.length) {
-    rightSiblings[0].previous = undefined
+    rightSiblings[0].previous = undefined;
   }
   for (const sibling of rightSiblings) {
     sibling.parent = task.id;
@@ -273,9 +281,7 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
     return tasks;
   }
 
-  let task = rev.tasks.find(t => t.id === rev.focusedID);
-  assert(task);
-  task = task!;
+  const task = getTaskByID(rev.focusedID, tasks);
   log("undo", task.title, rev.selection);
 
   // restore the focus
@@ -294,9 +300,7 @@ export function redo(tasks: TTask[], action: TRedo): TTask[] {
     return tasks;
   }
 
-  let task = rev.tasks.find(t => t.id === rev.focusedID);
-  assert(task);
-  task = task!;
+  const task = getTaskByID(rev.focusedID, tasks);
   log("redo", rev?.focusedID, rev?.selection);
 
   // restore the focus
@@ -306,4 +310,45 @@ export function redo(tasks: TTask[], action: TRedo): TTask[] {
   action.setManualTaskTitle({ id: rev.focusedID, title: task.title });
 
   return rev.tasks;
+}
+
+export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
+  const { id } = action
+  const task = getTaskByID(id, tasks)
+
+  // already at the top
+  if (!getVisiblePrevious(id, tasks, true)) {
+    return tasks
+  }
+
+  const previous = getTaskByID(task.previous!, tasks)
+  // put above `previous`
+  setPrevious(id, previous.previous, tasks)
+  previous.previous = task.id
+
+  log(`moveup`, task.id);
+  const ret = sortTasks(tasks);
+  action.store.set(ret, action.id, action.selection);
+  return ret;
+}
+
+
+export function moveDown(tasks: TTask[], action: TMoveDown): TTask[] {
+  const { id } = action
+  const task = getTaskByID(id, tasks)
+  const next = getVisibleNext(id, tasks, true);
+
+  // already at the bottom
+  if (!next) {
+    return tasks
+  }
+
+  // put after `next`
+  setPrevious(next.id, task.previous, tasks)
+  task.previous = next.id
+
+  log(`movedown`, task.id);
+  const ret = sortTasks(tasks);
+  action.store.set(ret, action.id, action.selection);
+  return ret;
 }

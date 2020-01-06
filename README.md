@@ -25,7 +25,7 @@ Please [report any issues](https://github.com/TaskSync/tasks-canvas-reborn/issue
 
 - list layout
 - keyboard navigation
-- simple actions (complete, edit, split, merge, indent, outdent)
+- actions (edit, move, complete, split, merge, indent, outdent)
 - persisting in localStorage
 - undo / redo (structural)
 

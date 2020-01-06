@@ -1,5 +1,28 @@
 import assert from "assert";
-import { TTaskID, TTask } from "./store";
+import uniqid from "uniqid";
+
+export type TTaskID = string;
+export type TTask = {
+  id: TTaskID;
+  title: string;
+  content?: string;
+  // TODO
+  // tasklist: TTaskListID;
+  parent?: TTaskID;
+  // user sorting
+  previous?: TTaskID;
+  // TODO iso date ?
+  created: number;
+  // TODO iso date ?
+  updated: number;
+  isCompleted?: boolean;
+};
+export type TRev = {
+  tasks: TTask[];
+  focusedID: string;
+  selection: TSelection;
+};
+export type TSelection = [number, number];
 
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
   return tasks.filter(t => t.parent === id);
@@ -102,6 +125,7 @@ export function setPrevious(
 ) {
   const task = getTaskByID(id, tasks);
   const next = getNext(id, tasks);
+
   // keep the left-linked list consistent
   if (next) {
     next.previous = task.previous;
@@ -117,4 +141,22 @@ export function setPrevious(
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
   const next = tasks.find(task => task.previous === id);
   return next || null;
+}
+
+// TODO iso date?
+export function now(): number {
+  return Date.now();
+}
+
+export function createTask(task: Partial<TTask> = {}): TTask {
+  const defaults = {
+    id: uniqid(),
+    title: "",
+    created: now(),
+    updated: now()
+  };
+  return {
+    ...defaults,
+    ...task
+  };
 }
