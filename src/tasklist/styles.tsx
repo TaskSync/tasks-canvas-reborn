@@ -16,7 +16,8 @@ export default makeStyles((_: Theme) =>
     cell: {
       border: "1px solid transparent",
       "border-width": "1px 0",
-      "vertical-align": "top"
+      "vertical-align": "top",
+      padding: 0,
     },
     selectedCell: {
       border: "1px solid #ece85b",
@@ -26,8 +27,6 @@ export default makeStyles((_: Theme) =>
     titleCell: {
       position: "relative",
       "padding-right": "1.5em",
-      // TODO em
-      "padding-top": "3px"
     },
     contentCell: {
       width: "30%",
@@ -43,7 +42,10 @@ export default makeStyles((_: Theme) =>
       width: "100%",
       outline: "0px solid transparent",
       "padding-left": "0.2em",
-      display: "inline-block"
+      display: "inline-block",
+      // TODO em
+      "padding-top": "3px",
+      height: '1.5em'
     },
     arrow: {
       position: "absolute",
