@@ -147,10 +147,13 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
 
   // MODIFY
 
-  // outdent next (visible) child siblings
+  // become the parent of next (visible) child siblings
   let lastSibling;
+  if (rightSiblings.length) {
+    rightSiblings[0].previous = undefined
+  }
   for (const sibling of rightSiblings) {
-    sibling.parent = undefined;
+    sibling.parent = task.id;
     sibling.updated = now();
     lastSibling = sibling;
   }
@@ -162,7 +165,7 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
 
   // link the next root task to this one or the last sibling (if any)
   if (nextOnRootLevel) {
-    nextOnRootLevel.previous = lastSibling?.id || task.id;
+    nextOnRootLevel.previous = task.id;
   }
 
   log(`outdent ${action.id}`);
