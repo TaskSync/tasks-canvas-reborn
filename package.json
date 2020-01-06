@@ -47,7 +47,9 @@
     "@types/classnames": "^2.2.9",
     "@types/debug": "^4.1.5",
     "@types/lodash": "^4.14.149",
+    "@types/react-beforeunload": "^2.1.0",
     "babel-jest": "^24.9.0",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "react-beforeunload": "^2.1.0"
   }
 }

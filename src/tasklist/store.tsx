@@ -1,6 +1,7 @@
 // @ts-ignore
 import deepcopy from "deepcopy";
 import debug from "debug";
+import uniqid from "uniqid";
 
 const log = debug("canvas");
 
@@ -109,6 +110,19 @@ export class Store {
 // TODO iso date?
 export function now(): number {
   return Date.now();
+}
+
+export function createTask(task: Partial<TTask> = {}): TTask {
+  const defaults = {
+    id: uniqid(),
+    title: "",
+    created: now(),
+    updated: now()
+  };
+  return {
+    ...defaults,
+    ...task
+  };
 }
 
 export default Store;

@@ -8,7 +8,7 @@ a keyboard-centric task management webapp.
 
 Unlike [many](https://www.gtaskd.com/)
 [other](https://chrome.google.com/webstore/detail/full-screen-for-google-ta/ndbaejgcaecffnhlmdghchfehkflgfkj?hl=en)
-[clones](https://www.reddit.com/r/productivity/comments/b8zaoc/alternatives_to_google_tasks/),
+[clones](https://tasksboard.app/),
 this one tries to be as close to the original as possible, with additional features under the hood.
 
 ## Demo

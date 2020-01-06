@@ -10,7 +10,7 @@ import {
   getChildren
 } from "./actions-helpers";
 import { sortTasks } from "./sorting";
-import Store, { TSelection, TTask, TTaskID, now } from "./store";
+import Store, { TSelection, TTask, TTaskID, now, createTask } from "./store";
 import debug from "debug";
 
 const log = debug("canvas");
@@ -185,15 +185,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
   log(`newline`, action.id);
 
-  // TODO extract the factory
-  const task2: TTask = {
-    id: uniqid(),
-    title: task2Title,
-    parent: undefined,
-    previous: undefined,
-    created: now(),
-    updated: now()
-  };
+  const task2: TTask = createTask({ title: task2Title });
 
   // modify
   task.title = task1Title;

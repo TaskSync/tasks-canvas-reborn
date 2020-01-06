@@ -1,35 +1,40 @@
 # Desktop
 
 ## BUGS
+- focus leaves a contentEditable after clicking on TS's border
 
 ## Milestone 1:
 c list UI
   c key navigation
 c table layout
-+ local storage backend
+c local storage backend
   c support undo
-  - add a new task
-  - support sorting (eg by date)
-  - save on page load
-  - save on page unload
-  - tests
-    - actions
-    - sorting
+  c add a new task
+  c save on page load
+  c save on page unload
+  c tests
+    c actions
+    c sorting
 + logging system
+- moving tasks
 - other shortcuts
   - get the original ones
+  - OS-depended differences
   - bind
   - dialog with a list
 - edit dialog
   - title
   - content
   - due date
+- sorting
+  - date
+  - completion
 + import / export
   + JSON
   - markdown
-- moving tasks
-  - keyboard
-  - drag & drop
+- drag & drop
+  - moving on the list
+  - moving between lists
 - left menu with task lists
 - top navbar
 - PWA
@@ -40,6 +45,7 @@ c table layout
   + bootstrap the integration
   - new JSON merge source
   - client side google auth 
+- show hidden / deleted tasks
 
 ## Milestone 3:
 - Navigation mode (modal)

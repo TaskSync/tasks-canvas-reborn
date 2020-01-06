@@ -14,10 +14,11 @@ import { setRange } from "selection-ranges";
 import * as actions from "./actions";
 import { TAction } from "./actions";
 import { getChildren } from "./actions-helpers";
-import { Store, TTask, TTaskID, TSelection } from "./store";
+import { Store, TTask, TTaskID, TSelection, createTask } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
 import { getSelection } from "./utils";
+import { useBeforeunload } from "react-beforeunload";
 
 function tasksReducer(state: TTask[], action: TAction): TTask[] {
   switch (action.type) {
@@ -43,11 +44,13 @@ function tasksReducer(state: TTask[], action: TAction): TTask[] {
 
 function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
-  const [list, dispatchList] = useReducer(tasksReducer, tasks);
+  const [list, dispatchList] = useReducer(tasksReducer, tasks || []);
   const rootTasks = list.filter((t: TTask) => !t.parent);
 
-  // TODO generate the first empty record if length === 0
-  assert(list[0].id);
+  // there always at least one task
+  if (!list.length) {
+    list.push(createTask());
+  }
 
   // FOCUS & SELECTION
 
@@ -67,7 +70,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   const [initialized, setInitialized] = useState(false);
   if (!initialized) {
-    store.addRev(list, list[0].id, selection);
+    store.set(list, list[0].id, selection);
     setInitialized(true);
   }
 
@@ -87,6 +90,23 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   let selectionBeforeTyping: TSelection | null = null;
   let titleBeforeTyping: string | null = null;
+
+  // PERSIST ON PAGE UNLOAD
+  // TODO doesnt work with refresh
+
+  useBeforeunload(() => {
+    const node = nodeRefs[focusedID];
+    if (!node) {
+      return;
+    }
+    dispatchList({
+      type: "update",
+      store,
+      id: focusedID,
+      title: node.textContent || "",
+      selection
+    });
+  });
 
   // HELPERS
 
@@ -141,7 +161,6 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
         type: "update",
         store,
         id,
-        // @ts-ignore
         title: target.textContent || "",
         selection
       });

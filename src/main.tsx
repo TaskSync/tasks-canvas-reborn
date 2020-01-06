@@ -1,22 +1,15 @@
 import { saveAs } from "file-saver";
 import React from "react";
 import ReactDOM from "react-dom";
-import defaultTasks from "./mock";
-import Store, { TTask } from "./tasklist/store";
+import mockTasks from "./mock";
+import Store from "./tasklist/store";
 import TaskList from "./tasklist/tasklist";
 
 const store = new Store();
-let cached: TTask[] | null;
-
-try {
-  cached = store.get();
-} catch {
-  // nothing
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={cached || defaultTasks} store={store} />,
+    <TaskList tasks={store.get() || mockTasks} store={store} />,
     document.body as HTMLElement
   );
 });
