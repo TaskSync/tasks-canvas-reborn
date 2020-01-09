@@ -17,7 +17,7 @@ export default makeStyles((_: Theme) =>
       border: "1px solid transparent",
       "border-width": "1px 0",
       "vertical-align": "top",
-      padding: 0,
+      padding: 0
     },
     selectedCell: {
       border: "1px solid #ece85b",
@@ -27,12 +27,14 @@ export default makeStyles((_: Theme) =>
     titleCell: {
       position: "relative",
       "padding-right": "1.5em",
+      "vertical-align": "middle"
     },
     contentCell: {
       width: "30%",
-      color: "gray",
       padding: "0 0.5em",
-      "font-size": "0.8em"
+      "font-size": "0.85em",
+      'text-overflow': 'ellipsis',
+      'white-space': 'nowrap'
     },
     checkboxCell: {
       width: "1.5em"
@@ -42,10 +44,8 @@ export default makeStyles((_: Theme) =>
       width: "100%",
       outline: "0px solid transparent",
       "padding-left": "0.2em",
-      display: "inline-block",
-      // TODO em
-      "padding-top": "3px",
-      height: '1.5em'
+      "padding-top": "0.1em",
+      display: "inline-block"
     },
     arrow: {
       position: "absolute",
@@ -54,13 +54,25 @@ export default makeStyles((_: Theme) =>
     },
     checkbox: {
       // TODO WTF?
-      padding: '0 !important',
+      padding: "0 !important",
       // TODO WTF?
-      margin: '0 !important',
+      // TODO em
+      margin: "2px 0 0 0 !important",
       "font-size": "1.2rem"
     },
     indent: {
       "padding-left": "1.5em"
+    },
+    content: {
+      "text-decoration": "none",
+      "&:hover": {
+        "text-decoration": "underline",
+        color: "darkgray"
+      },
+      "&:visited": {
+        color: "gray",
+        "text-decoration": "none"
+      }
     }
   })
 );

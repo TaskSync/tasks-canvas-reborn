@@ -5,9 +5,10 @@ export type TTaskID = string;
 export type TTask = {
   id: TTaskID;
   title: string;
-  content?: string;
+  content: string;
   // TODO
   // tasklist: TTaskListID;
+  duedate: string;
   parent?: TTaskID;
   // user sorting
   previous?: TTaskID;
@@ -152,6 +153,8 @@ export function createTask(task: Partial<TTask> = {}): TTask {
   const defaults = {
     id: uniqid(),
     title: "",
+    content: "",
+    duedate: "",
     created: now(),
     updated: now()
   };

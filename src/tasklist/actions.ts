@@ -12,7 +12,8 @@ import {
   now,
   TSelection,
   TTask,
-  TTaskID, getVisibleNext
+  TTaskID,
+  getVisibleNext
 } from "./model";
 import { sortTasks } from "./sorting";
 import Store from "./store";
@@ -37,6 +38,8 @@ export type TAction =
 export type TUpdate = {
   type: "update";
   title: string;
+  content?: string;
+  duedate?: string;
 } & TTaskActionBase;
 export type TIndent = { type: "indent" } & TTaskActionBase;
 export type TMoveUp = { type: "moveUp" } & TTaskActionBase;
@@ -79,12 +82,26 @@ export type TUndoBase = {
 export function update(tasks: TTask[], action: TUpdate): TTask[] {
   const task = getTaskByID(action.id, tasks);
 
-  if (task.title === action.title) {
+  const newFields: Partial<TTask> = {};
+  if (action.title !== undefined && task.title !== action.title) {
+    newFields.title = action.title;
+  }
+  if (action.content !== undefined && task.content !== action.content) {
+    newFields.content = action.content;
+  }
+  if (action.duedate !== undefined && task.duedate !== action.duedate) {
+    newFields.duedate = action.duedate;
+  }
+
+  if (!Object.keys(newFields)) {
     return tasks;
   }
 
-  // modify
-  task.title = action.title;
+  // MODIFY
+
+  for (const [field, val] of Object.entries(newFields)) {
+    task[field] = val;
+  }
   task.updated = now();
 
   log(`updated ${action.id} with`, task.title);
@@ -313,18 +330,18 @@ export function redo(tasks: TTask[], action: TRedo): TTask[] {
 }
 
 export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
-  const { id } = action
-  const task = getTaskByID(id, tasks)
+  const { id } = action;
+  const task = getTaskByID(id, tasks);
 
   // already at the top
   if (!getVisiblePrevious(id, tasks, true)) {
-    return tasks
+    return tasks;
   }
 
-  const previous = getTaskByID(task.previous!, tasks)
+  const previous = getTaskByID(task.previous!, tasks);
   // put above `previous`
-  setPrevious(id, previous.previous, tasks)
-  previous.previous = task.id
+  setPrevious(id, previous.previous, tasks);
+  previous.previous = task.id;
 
   log(`moveup`, task.id);
   const ret = sortTasks(tasks);
@@ -332,20 +349,19 @@ export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
   return ret;
 }
 
-
 export function moveDown(tasks: TTask[], action: TMoveDown): TTask[] {
-  const { id } = action
-  const task = getTaskByID(id, tasks)
+  const { id } = action;
+  const task = getTaskByID(id, tasks);
   const next = getVisibleNext(id, tasks, true);
 
   // already at the bottom
   if (!next) {
-    return tasks
+    return tasks;
   }
 
   // put after `next`
-  setPrevious(next.id, task.previous, tasks)
-  task.previous = next.id
+  setPrevious(next.id, task.previous, tasks);
+  task.previous = next.id;
 
   log(`movedown`, task.id);
   const ret = sortTasks(tasks);

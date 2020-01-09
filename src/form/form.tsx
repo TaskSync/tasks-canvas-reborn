@@ -1,9 +1,10 @@
-// @ts-ignore TODO types
-import TextareaAutosize from "@material-ui/core/es/TextareaAutosize";
-// @ts-ignore TODO types
-import Checkbox from "@material-ui/core/es/Checkbox";
-import React, { useEffect } from "react";
+import Checkbox from "@material-ui/core/Checkbox";
+import TextareaAutosize from "@material-ui/core/TextareaAutosize";
+// @ts-ignore
+import deepcopy from "deepcopy";
+import React, { useEffect, ChangeEvent, KeyboardEvent, useState } from "react";
 import { TTask } from "../tasklist/model";
+import useStyles from "./styles";
 
 export default function({
   task,
@@ -11,38 +12,79 @@ export default function({
 }: // TODO setCompleted (dispatcher)
 {
   task: TTask;
-  handleClose: () => void;
+  handleClose: (task: TTask) => void;
 }) {
+  const classes = useStyles({});
+  const [edited, setEdited] = useState<TTask>(deepcopy(task));
   let textareaNode: HTMLTextAreaElement;
 
+  function onChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    setEdited({
+      ...task,
+      content: event.target.value
+    });
+  }
+
+  function onCheckbox() {
+    setEdited({ ...edited, completed: !edited.completed });
+  }
+
+  function onESC(event: KeyboardEvent<HTMLElement>) {
+    console.log(event.key);
+    if (event.key === "Escape") {
+      handleClose(task);
+    }
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+      handleClose(edited);
+    }
+    onESC(event);
+  }
+
   useEffect(() => {
-    // TODO
-    // textareaNode.focus();
+    setTimeout(() => {
+      if (textareaNode) {
+        textareaNode.focus();
+      }
+    });
   });
 
   // TODO extract styles
-  // TODO rowsMax / Min
+  // TODO autofocus
   return (
     <form>
       <p>
-        <a href="#" onClick={handleClose}>
+        <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
           &lt; Back To List
         </a>
       </p>
       <p>
-        <Checkbox checked={task.completed} disableRipple /> {task.title}
+        <Checkbox
+          onChange={onCheckbox}
+          checked={edited.completed}
+          onKeyDown={onESC}
+        />{" "}
+        {edited.title}
       </p>
       <TextareaAutosize
-        style={{ width: "100%" }}
+        onKeyDown={onKeyDown}
+        className={classes.textarea}
         rowsMax={100}
         rowsMin={5}
         ref={(node: HTMLTextAreaElement) => {
           textareaNode = node;
         }}
-        autoFocus={true}
-      >
-        {task.content}
-      </TextareaAutosize>
+        onChange={onChange}
+        value={edited.content}
+      />
+      <p>
+        <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
+          &lt; Back To List
+        </a>
+      </p>
     </form>
   );
 }

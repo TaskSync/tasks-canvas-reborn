@@ -23,14 +23,16 @@ c logging system
   c get the original ones
   c OS-depended differences
   c bind
-  - dialog with a list
-- edit dialog
-  - title
-  - content
++ edit form
+  + title
+  + content
   - due date
 - render attrs on the list view
   - notes
   - duedate
+- top navbar
+- layout
+  - blue checkboxes
 + import / export
   + JSON
   - markdown
@@ -39,7 +41,6 @@ c logging system
   - moving on the list
   - moving between lists
 - left menu with task lists
-- top navbar
 - PWA
   - service worker
 

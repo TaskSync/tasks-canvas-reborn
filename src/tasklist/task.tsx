@@ -10,16 +10,19 @@ function Task({
   task,
   focusedID,
   setFocusedNode,
-  setNodeRef
+  setNodeRef,
+  setFormVisible
 }: {
   task: TTask;
   focusedID: TTaskID;
   setFocusedNode: (node: HTMLSpanElement) => void;
+  setFormVisible: (id: TTaskID) => void;
   setNodeRef: (id: string, node: HTMLSpanElement) => void;
 }) {
   const classes = useStyles({});
   const { id, title } = task;
   const isSelected = id === focusedID;
+  const content = task.content.substr(0, 100).replace(/\n/g, "");
 
   const checkboxNode = (
     <Checkbox
@@ -52,7 +55,11 @@ function Task({
           isSelected ? classes.selectedCell : null
         )}
       >
-        {isSelected ? <ArrowRightIcon className={classes.arrow} /> : null}
+        {isSelected ? (
+          <a href="#" className={classes.arrow}>
+            <ArrowRightIcon onClick={setFormVisible.bind(null, id)} />
+          </a>
+        ) : null}
         <span
           contentEditable={true}
           suppressContentEditableWarning={true}
@@ -72,7 +79,13 @@ function Task({
         </span>
       </td>
       <td className={classnames(classes.cell, classes.contentCell)}>
-        {task.content}
+        <a
+          href="#"
+          onClick={setFormVisible.bind(null, id)}
+          className={classes.content}
+        >
+          {content}
+        </a>
       </td>
     </tr>
   );

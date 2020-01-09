@@ -117,8 +117,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   });
 
   // DIALOG
-  const [formVisible, setFormVisible] = useState<boolean>(false);
-  const [formTaskID, setFormTaskID] = useState<TTaskID | null>(null);
+  const [formVisible, setFormVisible] = useState<TTaskID | null>(null);
 
   // HELPERS
 
@@ -228,8 +227,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     // EDIT FORM
     else if (event.key === "Enter" && event.shiftKey) {
       event.preventDefault();
-      setFormVisible(true);
-      setFormTaskID(focusedID);
+      setFormVisible(focusedID);
     }
 
     // INDENT OUTDENT
@@ -376,26 +374,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
   }
 
-  // used to identify a (delegated) click on one-of-many-and-all nodes
-  // composing a material-ui checkbox
-  function isCheckbox(target: HTMLElement, root: HTMLElement): boolean {
-    if (target?.tagName?.toLowerCase() === "input") {
-      return true;
-    }
-
-    let node = target;
-    do {
-      if (node?.tagName?.toLowerCase() === "input") {
-        return true;
-      } else if (node?.dataset.checkbox) {
-        return true;
-      }
-      node = node?.parentElement || target;
-    } while (node && node !== root);
-
-    return false;
-  }
-
   function handleClick(event: MouseEvent<HTMLElement>) {
     const id = getDataID(event);
     const target = event.target as HTMLElement;
@@ -456,6 +434,19 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     resetUndoCounters();
   }
 
+  function handleForm(task: TTask) {
+    setFormVisible(null)
+    dispatchList({
+      type: "update",
+      store,
+      id: focusedID,
+      title: task.title || "",
+      content: task.content || "",
+      duedate: task.duedate || undefined,
+      selection
+    });
+  }
+
   // restore the focus and selection
   useEffect(() => {
     setDuringUndo(false);
@@ -484,7 +475,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   return (
     <Fragment>
       <table
-        style={formVisible && formTaskID ? { display: "none" } : {}}
+        style={formVisible ? { display: "none" } : {}}
         className={classes.table}
         onMouseUp={handleClick}
         onKeyUp={handleKeyUp}
@@ -502,6 +493,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
                   focusedID={focusedID}
                   setFocusedNode={setFocusedNode}
                   setNodeRef={setNodeRef}
+                  setFormVisible={setFormVisible}
                 />
               );
             }
@@ -513,6 +505,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
                   focusedID={focusedID}
                   setFocusedNode={setFocusedNode}
                   setNodeRef={setNodeRef}
+                  setFormVisible={setFormVisible}
                 />
                 {children}
               </Fragment>
@@ -520,15 +513,35 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
           })}
         </tbody>
       </table>
-      {formVisible && formTaskID && (
+      {formVisible && (
         <Form
-          task={getTaskByID(formTaskID)}
-          handleClose={setFormVisible.bind(null, false)}
+          task={getTaskByID(formVisible)}
+          handleClose={handleForm}
         />
       )}
     </Fragment>
   );
 }
+
+  // used to identify a (delegated) click on one-of-many-and-all nodes
+  // composing a material-ui checkbox
+  function isCheckbox(target: HTMLElement, root: HTMLElement): boolean {
+    if (target?.tagName?.toLowerCase() === "input") {
+      return true;
+    }
+
+    let node = target;
+    do {
+      if (node?.tagName?.toLowerCase() === "input") {
+        return true;
+      } else if (node?.dataset.checkbox) {
+        return true;
+      }
+      node = node?.parentElement || target;
+    } while (node && node !== root);
+
+    return false;
+  }
 
 /**
  * Returns the task ID from the event.
