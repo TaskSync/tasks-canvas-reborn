@@ -1,3 +1,4 @@
+import Form from "../form/form";
 import assert from "assert";
 import React, {
   FocusEvent,
@@ -49,7 +50,7 @@ function tasksReducer(state: TTask[], action: TAction): TTask[] {
   return state;
 }
 
-function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
+export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(tasksReducer, tasks || []);
   const rootTasks = list.filter((t: TTask) => !t.parent);
@@ -115,6 +116,10 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
     });
   });
 
+  // DIALOG
+  const [formVisible, setFormVisible] = useState<boolean>(false);
+  const [formTaskID, setFormTaskID] = useState<TTaskID | null>(null);
+
   // HELPERS
 
   function getTaskByID(id: string): TTask {
@@ -150,10 +155,12 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   /**
    * Handles:
-   * - tab
-   * - arrow up / down
-   * - backspace (beginning of a line)
+   * - indent (Tab)
+   * - navigate (arrow up / down)
+   * - move (META + arrow up / down)
+   * - merge prev line (Backspace)
    * - selection deletion (along with keyUp)
+   * - edit form (shift + enter)
    */
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     const id = getDataID(event);
@@ -163,7 +170,7 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
     // always save text before performing other action
     function createRevision() {
-      log("createRevision");
+      log("createRevision?");
       dispatchList({
         type: "update",
         store,
@@ -216,6 +223,13 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
       } else {
         dispatchList({ type: "moveDown", id, store, selection: selection });
       }
+    }
+
+    // EDIT FORM
+    else if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+      setFormVisible(true);
+      setFormTaskID(focusedID);
     }
 
     // INDENT OUTDENT
@@ -468,42 +482,51 @@ function TaskList({ tasks, store }: { tasks: TTask[]; store: Store }) {
   });
 
   return (
-    <table
-      className={classes.table}
-      onMouseUp={handleClick}
-      onKeyUp={handleKeyUp}
-      onKeyDown={handleKeyDown}
-      onBlur={handleBlur}
-    >
-      <tbody>
-        {rootTasks.map((task: TTask) => {
-          const children = [];
-          for (const child of getChildren(task.id, list)) {
-            children.push(
-              <Task
-                key={child.id}
-                task={child}
-                focusedID={focusedID}
-                setFocusedNode={setFocusedNode}
-                setNodeRef={setNodeRef}
-              />
+    <Fragment>
+      <table
+        style={formVisible && formTaskID ? { display: "none" } : {}}
+        className={classes.table}
+        onMouseUp={handleClick}
+        onKeyUp={handleKeyUp}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+      >
+        <tbody>
+          {rootTasks.map((task: TTask) => {
+            const children = [];
+            for (const child of getChildren(task.id, list)) {
+              children.push(
+                <Task
+                  key={child.id}
+                  task={child}
+                  focusedID={focusedID}
+                  setFocusedNode={setFocusedNode}
+                  setNodeRef={setNodeRef}
+                />
+              );
+            }
+            return (
+              <Fragment key={task.id}>
+                <Task
+                  key={task.id}
+                  task={task}
+                  focusedID={focusedID}
+                  setFocusedNode={setFocusedNode}
+                  setNodeRef={setNodeRef}
+                />
+                {children}
+              </Fragment>
             );
-          }
-          return (
-            <Fragment key={task.id}>
-              <Task
-                key={task.id}
-                task={task}
-                focusedID={focusedID}
-                setFocusedNode={setFocusedNode}
-                setNodeRef={setNodeRef}
-              />
-              {children}
-            </Fragment>
-          );
-        })}
-      </tbody>
-    </table>
+          })}
+        </tbody>
+      </table>
+      {formVisible && formTaskID && (
+        <Form
+          task={getTaskByID(formTaskID)}
+          handleClose={setFormVisible.bind(null, false)}
+        />
+      )}
+    </Fragment>
   );
 }
 
@@ -522,5 +545,3 @@ function getDataID(event: SyntheticEvent<Node>): TTaskID {
   }
   throw new Error("missing [data-id]");
 }
-
-export default TaskList;

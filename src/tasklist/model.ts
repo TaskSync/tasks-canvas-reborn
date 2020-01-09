@@ -15,7 +15,7 @@ export type TTask = {
   created: number;
   // TODO iso date ?
   updated: number;
-  isCompleted?: boolean;
+  completed?: boolean;
 };
 export type TRev = {
   tasks: TTask[];

@@ -1,8 +1,9 @@
 # Desktop
 
 ## BUGS
-- focus leaves a contentEditable after clicking on TS's border
-- undo seems to loop
+- cant click the checkbox on an unfocused task
+- focus leaves a contentEditable after clicking on a table's border
+- checkbox should be blue
 
 ## Milestone 1:
 c list UI
@@ -18,10 +19,10 @@ c local storage backend
     c sorting
 c logging system
 + moving tasks
-- other shortcuts
-  - get the original ones
-  - OS-depended differences
-  - bind
++ other shortcuts
+  c get the original ones
+  c OS-depended differences
+  c bind
   - dialog with a list
 - edit dialog
   - title

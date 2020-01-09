@@ -265,7 +265,7 @@ export function completed(tasks: TTask[], action: TCompleted): TTask[] {
   const task = getTaskByID(action.id, tasks);
 
   // modify
-  task.isCompleted = action.completed;
+  task.completed = action.completed;
   task.updated = now();
 
   log(`completed`, task.id, action.completed);

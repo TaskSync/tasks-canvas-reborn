@@ -19,17 +19,14 @@ function Task({
 }) {
   const classes = useStyles({});
   const { id, title } = task;
-  const labelId = `checkbox-list-label-${id}`;
   const isSelected = id === focusedID;
 
   const checkboxNode = (
     <Checkbox
       data-checkbox="true"
-      checked={task.isCompleted}
+      checked={task.completed}
       className={classes.checkbox}
-      tabIndex={-1}
       disableRipple
-      inputProps={{ "aria-labelledby": labelId }}
     />
   );
 
