@@ -22,7 +22,7 @@ function Task({
   const classes = useStyles({});
   const { id, title } = task;
   const isSelected = id === focusedID;
-  const content = task.content.substr(0, 100).replace(/\n/g, "");
+  const content = task.content.substr(0, 100).replace(/\n/g, " ");
 
   const checkboxNode = (
     <Checkbox

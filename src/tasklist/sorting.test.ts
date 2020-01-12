@@ -56,6 +56,8 @@ export function t(text: string, task?: Partial<TTask>): TTask {
     updated: now(),
     created: now(),
     previous: task?.previous || undefined,
-    parent: task?.parent || undefined
+    parent: task?.parent || undefined,
+    content: '',
+    duedate: ''
   };
 }
