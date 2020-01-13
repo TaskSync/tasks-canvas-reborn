@@ -443,6 +443,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       title: task.title || "",
       content: task.content || "",
       duedate: task.duedate || undefined,
+      completed: task.completed,
       selection
     });
   }

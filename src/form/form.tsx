@@ -16,6 +16,7 @@ export default function({
 }) {
   const classes = useStyles({});
   const [edited, setEdited] = useState<TTask>(deepcopy(task));
+  const [focusTextarea, setFocusTextarea] = useState<boolean>(true);
   let textareaNode: HTMLTextAreaElement;
 
   function onChange(event: ChangeEvent<HTMLTextAreaElement>) {
@@ -27,6 +28,7 @@ export default function({
 
   function onCheckbox() {
     setEdited({ ...edited, completed: !edited.completed });
+    setFocusTextarea(false)
   }
 
   function onESC(event: KeyboardEvent<HTMLElement>) {
@@ -45,6 +47,9 @@ export default function({
   }
 
   useEffect(() => {
+    if (!focusTextarea) {
+      return
+    }
     setTimeout(() => {
       if (textareaNode) {
         textareaNode.focus();
@@ -52,39 +57,40 @@ export default function({
     });
   });
 
-  // TODO extract styles
-  // TODO autofocus
   return (
     <form>
-      <p>
+      <div className={classes.back}>
         <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
           &lt; Back To List
         </a>
-      </p>
-      <p>
+      </div>
+      <div className={classes.row}>
         <Checkbox
+          className={classes.checkbox}
           onChange={onCheckbox}
           checked={edited.completed}
           onKeyDown={onESC}
         />{" "}
         {edited.title}
-      </p>
-      <TextareaAutosize
-        onKeyDown={onKeyDown}
-        className={classes.textarea}
-        rowsMax={100}
-        rowsMin={5}
-        ref={(node: HTMLTextAreaElement) => {
-          textareaNode = node;
-        }}
-        onChange={onChange}
-        value={edited.content}
-      />
-      <p>
+      </div>
+      <div className={classes.row}>
+        <TextareaAutosize
+          onKeyDown={onKeyDown}
+          className={classes.textarea}
+          rowsMax={100}
+          rowsMin={5}
+          ref={(node: HTMLTextAreaElement) => {
+            textareaNode = node;
+          }}
+          onChange={onChange}
+          value={edited.content}
+        />
+      </div>
+      <div className={classes.back}>
         <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
           &lt; Back To List
         </a>
-      </p>
+      </div>
     </form>
   );
 }

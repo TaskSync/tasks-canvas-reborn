@@ -40,6 +40,7 @@ export type TUpdate = {
   title: string;
   content?: string;
   duedate?: string;
+  completed?: boolean;
 } & TTaskActionBase;
 export type TIndent = { type: "indent" } & TTaskActionBase;
 export type TMoveUp = { type: "moveUp" } & TTaskActionBase;
@@ -91,6 +92,9 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
   }
   if (action.duedate !== undefined && task.duedate !== action.duedate) {
     newFields.duedate = action.duedate;
+  }
+  if (action.completed !== undefined && task.completed !== action.completed) {
+    newFields.completed = action.completed;
   }
 
   if (!Object.keys(newFields)) {

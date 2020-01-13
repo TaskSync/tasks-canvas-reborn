@@ -35,9 +35,9 @@ Please [report any issues](https://github.com/TaskSync/tasks-canvas-reborn/issue
 - toolbar
 - task lists
 - syncing with Google Tasks API
-  - using the [TaskBot's engine](https://github.com/TaskSync/TaskBot.app)
+  - using [TaskBot's engine](https://github.com/TaskSync/TaskBot.app)
   - conflict resolution (aka dont-loose-data)
-- import / export (JSON, markdown)
+- import / export (JSON, markdown, print)
 - due dates
 - drag & drop
 - PWA
