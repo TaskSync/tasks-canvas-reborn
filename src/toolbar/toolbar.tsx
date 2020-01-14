@@ -5,6 +5,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import MenuIcon from "@material-ui/icons/Menu";
 import React from "react";
 import useStyles from "./styles";
+import classnames from "classnames";
 
 export type ToolbarProps = {};
 
@@ -20,53 +21,37 @@ export default function(props: ToolbarProps) {
     <Toolbar className={classes.toolbar}>
       <Button className={classes.button}>Clear completed</Button>
       {divider}
-      <Button className={classes.button} startIcon={<MenuIcon />}>
-        New task
+
+      <Button className={classes.button}>
+        <MenuIcon /> New task
       </Button>
       {divider}
+
       <Button className={classes.button}>Edit details</Button>
       {divider}
-      <IconButton
-        disableRipple={true}
-        className={classes.iconButton}
-        aria-label="Indent"
-      >
+
+      <Button className={classes.button} aria-label="Indent">
         <MenuIcon />
-      </IconButton>
-      <IconButton
-        disableRipple={true}
-        className={classes.iconButton}
-        aria-label="Outdent"
-      >
-        <MenuIcon />
-      </IconButton>
-      {divider}
-      <IconButton
-        disableRipple={true}
-        className={classes.iconButton}
-        aria-label="Mode up"
-      >
-        <MenuIcon />
-      </IconButton>
-      <IconButton
-        disableRipple={true}
-        className={classes.iconButton}
-        aria-label="Mode down"
-      >
-        <MenuIcon />
-      </IconButton>
-      {divider}
-      <IconButton
-        disableRipple={true}
-        className={classes.iconButton}
-        aria-label="Delete"
-      >
-        <MenuIcon />
-      </IconButton>
-      {divider}
-      <Button className={classes.button}>
-        Refresh
       </Button>
+      <Button className={classes.button} aria-label="Outdent">
+        <MenuIcon />
+      </Button>
+      {divider}
+
+      <Button className={classes.button} aria-label="Move up">
+        <MenuIcon />
+      </Button>
+      <Button className={classes.button} aria-label="Move down">
+        <MenuIcon />
+      </Button>
+      {divider}
+
+      <Button className={classes.button} aria-label="Delete">
+        <MenuIcon />
+      </Button>
+      {divider}
+
+      <Button className={classes.button}>Refresh</Button>
 
       <div className={classes.grow} />
 

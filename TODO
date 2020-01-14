@@ -3,7 +3,8 @@
 ## BUGS
 - cant click the checkbox on an unfocused task
 - focus leaves a contentEditable after clicking on a table's border
-- checkbox should be blue
+- exception after going from the form to the list
+- undo doesnt work on chrome/linux
 
 ## Milestone 1:
 c list UI

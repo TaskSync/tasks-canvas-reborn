@@ -1,4 +1,5 @@
 // source - stack overflow
+import { KeyboardEvent } from "react";
 import { TSelection } from "./model";
 
 // TODO use `selection-ranges` ???
@@ -16,4 +17,14 @@ export function getSelection(editableDiv: HTMLElement): TSelection | undefined {
 
 export function isMacOS(): boolean {
   return navigator.platform.toLocaleLowerCase().includes("mac");
+}
+
+/**
+ * Returns true if ctrl (linux, win) or meta (mac) has been pressed and not
+ * the other.
+ */
+export function ctrlMetaPressed(event: KeyboardEvent<HTMLElement>) {
+  return isMacOS()
+    ? event.metaKey && !event.ctrlKey
+    : !event.metaKey && event.ctrlKey;
 }

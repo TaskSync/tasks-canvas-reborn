@@ -14,14 +14,14 @@ import { useBeforeunload } from "react-beforeunload";
 // @ts-ignore
 import { setRange } from "selection-ranges";
 import Form from "../form/form";
-import Toolbar from '../toolbar/toolbar'
+import Toolbar from "../toolbar/toolbar";
 import * as actions from "./actions";
 import { TAction } from "./actions";
 import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
-import { getSelection, isMacOS } from "./utils";
+import { getSelection, isMacOS, ctrlMetaPressed } from "./utils";
 
 const log = debug("canvas");
 
@@ -185,12 +185,12 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       String.fromCharCode(event.keyCode).toLowerCase() === "z" &&
       !event.altKey &&
       !event.shiftKey &&
-      event.metaKey;
+      ctrlMetaPressed(event);
     const redoPressed =
       String.fromCharCode(event.keyCode).toLowerCase() === "z" &&
       !event.altKey &&
       event.shiftKey &&
-      event.metaKey;
+      ctrlMetaPressed(event);
 
     // SWITCH TASKS
     if (["ArrowDown", "ArrowUp"].includes(event.key) && !isModifierKey(event)) {
@@ -436,7 +436,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   }
 
   function handleForm(task: TTask) {
-    setFormVisible(null)
+    setFormVisible(null);
     dispatchList({
       type: "update",
       store,
@@ -476,7 +476,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   return (
     <Fragment>
-      <Toolbar/>
+      <Toolbar />
       <table
         style={formVisible ? { display: "none" } : {}}
         className={classes.table}
@@ -517,34 +517,31 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         </tbody>
       </table>
       {formVisible && (
-        <Form
-          task={getTaskByID(formVisible)}
-          handleSubmit={handleForm}
-        />
+        <Form task={getTaskByID(formVisible)} handleSubmit={handleForm} />
       )}
     </Fragment>
   );
 }
 
-  // used to identify a (delegated) click on one-of-many-and-all nodes
-  // composing a material-ui checkbox
-  function isCheckbox(target: HTMLElement, root: HTMLElement): boolean {
-    if (target?.tagName?.toLowerCase() === "input") {
+// used to identify a (delegated) click on one-of-many-and-all nodes
+// composing a material-ui checkbox
+function isCheckbox(target: HTMLElement, root: HTMLElement): boolean {
+  if (target?.tagName?.toLowerCase() === "input") {
+    return true;
+  }
+
+  let node = target;
+  do {
+    if (node?.tagName?.toLowerCase() === "input") {
+      return true;
+    } else if (node?.dataset.checkbox) {
       return true;
     }
+    node = node?.parentElement || target;
+  } while (node && node !== root);
 
-    let node = target;
-    do {
-      if (node?.tagName?.toLowerCase() === "input") {
-        return true;
-      } else if (node?.dataset.checkbox) {
-        return true;
-      }
-      node = node?.parentElement || target;
-    } while (node && node !== root);
-
-    return false;
-  }
+  return false;
+}
 
 /**
  * Returns the task ID from the event.
