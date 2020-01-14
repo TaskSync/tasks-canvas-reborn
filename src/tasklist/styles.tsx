@@ -33,8 +33,8 @@ export default makeStyles((_: Theme) =>
       width: "30%",
       padding: "0 0.5em",
       "font-size": "0.85em",
-      'text-overflow': 'ellipsis',
-      'white-space': 'nowrap'
+      "text-overflow": "ellipsis",
+      "white-space": "nowrap"
     },
     checkboxCell: {
       width: "1.5em"
@@ -64,6 +64,7 @@ export default makeStyles((_: Theme) =>
       "padding-left": "1.5em"
     },
     content: {
+      color: "gray",
       "text-decoration": "none",
       "&:hover": {
         "text-decoration": "underline",

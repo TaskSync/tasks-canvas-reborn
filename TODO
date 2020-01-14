@@ -31,7 +31,23 @@ c logging system
 + render attrs on the list view
   c notes
   - duedate
-- top navbar
++ top navbar
+  - left (actions)
+    - clear completed
+    - new task
+    - edit details
+    - indent (icon)
+    - outdent (icon)
+    - mode up (icon)
+    - mode down (icon)
+    - delete (icon)
+    - refresh
+    - print
+  - right (view)
+    - my order
+    - sort by date
+    - completed tasks
+    - trash
 - layout
   - blue checkboxes
 + import / export

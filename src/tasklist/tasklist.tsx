@@ -1,5 +1,5 @@
-import Form from "../form/form";
 import assert from "assert";
+import debug from "debug";
 import React, {
   FocusEvent,
   KeyboardEvent,
@@ -10,8 +10,11 @@ import React, {
   SyntheticEvent,
   Fragment
 } from "react";
+import { useBeforeunload } from "react-beforeunload";
 // @ts-ignore
 import { setRange } from "selection-ranges";
+import Form from "../form/form";
+import Toolbar from '../toolbar/toolbar'
 import * as actions from "./actions";
 import { TAction } from "./actions";
 import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
@@ -19,8 +22,6 @@ import { Store } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
 import { getSelection, isMacOS } from "./utils";
-import { useBeforeunload } from "react-beforeunload";
-import debug from "debug";
 
 const log = debug("canvas");
 
@@ -475,6 +476,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   return (
     <Fragment>
+      <Toolbar/>
       <table
         style={formVisible ? { display: "none" } : {}}
         className={classes.table}
@@ -517,7 +519,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       {formVisible && (
         <Form
           task={getTaskByID(formVisible)}
-          handleClose={handleForm}
+          handleSubmit={handleForm}
         />
       )}
     </Fragment>

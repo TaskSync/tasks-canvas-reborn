@@ -8,11 +8,11 @@ import useStyles from "./styles";
 
 export default function({
   task,
-  handleClose
+  handleSubmit
 }: // TODO setCompleted (dispatcher)
 {
   task: TTask;
-  handleClose: (task: TTask) => void;
+  handleSubmit: (task: TTask) => void;
 }) {
   const classes = useStyles({});
   const [edited, setEdited] = useState<TTask>(deepcopy(task));
@@ -34,14 +34,14 @@ export default function({
   function onESC(event: KeyboardEvent<HTMLElement>) {
     console.log(event.key);
     if (event.key === "Escape") {
-      handleClose(task);
+      handleSubmit(task);
     }
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && event.shiftKey) {
       event.preventDefault();
-      handleClose(edited);
+      handleSubmit(edited);
     }
     onESC(event);
   }
@@ -60,7 +60,7 @@ export default function({
   return (
     <form>
       <div className={classes.back}>
-        <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
+        <a href="#" onClick={handleSubmit.bind(null, edited)} onKeyDown={onESC}>
           &lt; Back To List
         </a>
       </div>
@@ -87,7 +87,7 @@ export default function({
         />
       </div>
       <div className={classes.back}>
-        <a href="#" onClick={handleClose.bind(null, edited)} onKeyDown={onESC}>
+        <a href="#" onClick={handleSubmit.bind(null, edited)} onKeyDown={onESC}>
           &lt; Back To List
         </a>
       </div>
