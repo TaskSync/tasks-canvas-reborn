@@ -24,11 +24,12 @@ c logging system
   c OS-depended differences
   c bind
 + edit form
-  + title
-  + content
+  c title
+  c content
   - due date
-- render attrs on the list view
-  - notes
+  - confirm when loosing changes (ESC)
++ render attrs on the list view
+  c notes
   - duedate
 - top navbar
 - layout
@@ -48,7 +49,7 @@ c logging system
 + bind to the sync engine
   + bootstrap the integration
   - new JSON merge source
-  - client side google auth 
+  - client side google auth
 - show hidden / deleted tasks
 - group by due dates (flat view)
   - fold / unfold a group
@@ -64,13 +65,13 @@ c logging system
   - list of task lists on the task list (yes...)
 - MC mode
   - dir-like navi as /list/task
-  - second panel
-  - move function
+  - second pane
+  - move / copy between panes
 
 ## Optimization
 - use lodash-es
   - breaks `jest`
-  - increases the bundle size by +100kb
+  - decreases the bundle size by +100kb
 
 # Mobile
 

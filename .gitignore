@@ -1,6 +1,7 @@
 node_modules
 .cache
-.idea/*
+.idea
 dist/*
 /.browserslistrc
 .vscode
+/yarn-error.log
