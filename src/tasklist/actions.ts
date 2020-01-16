@@ -26,7 +26,6 @@ export type TAction =
   | TUpdate
   | TNewline
   | TIndent
-  | TCompleted
   | TOutdent
   | TUndo
   | TRedo
@@ -39,7 +38,7 @@ export type TAction =
 // per-task actions
 export type TUpdate = {
   type: "update";
-  title: string;
+  title?: string;
   content?: string;
   duedate?: string;
   completed?: boolean;
@@ -48,10 +47,6 @@ export type TIndent = { type: "indent" } & TTaskActionBase;
 export type TMoveUp = { type: "moveUp" } & TTaskActionBase;
 export type TMoveDown = { type: "moveDown" } & TTaskActionBase;
 export type TOutdent = { type: "outdent" } & TTaskActionBase;
-export type TCompleted = {
-  type: "completed";
-  completed: boolean;
-} & TTaskActionBase;
 export type TNewline = {
   type: "newline";
   setFocusedID(id: TTaskID): void;
@@ -67,6 +62,8 @@ export type TClearCompleted = {
 } & TTaskActionBase;
 export type TNewTask = {
   type: "newTask";
+  setFocusedID(id: TTaskID): void;
+  setSelection(selection: TSelection): void;
 } & TTaskActionBase;
 type TTaskActionBase = {
   store: Store;
@@ -90,8 +87,6 @@ export type TUndoBase = {
 
 export function reducer(state: TTask[], action: TAction): TTask[] {
   switch (action.type) {
-    case "completed":
-      return completed(state, action);
     case "indent":
       return indent(state, action);
     case "mergePrevLine":
@@ -133,6 +128,10 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
   }
   if (action.completed !== undefined && task.completed !== action.completed) {
     newFields.completed = action.completed;
+    if (!action.completed) {
+      // un-hide when un-completing
+      newFields.hidden = false;
+    }
   }
 
   if (!Object.keys(newFields)) {
@@ -146,7 +145,7 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
   }
   task.updated = now();
 
-  log(`updated ${action.id} with`, task.title);
+  log(`updated ${action.id}`, newFields);
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;
@@ -319,19 +318,6 @@ export function mergePrevLine(tasks: TTask[], action: TMergePrevLine): TTask[] {
   return ret;
 }
 
-export function completed(tasks: TTask[], action: TCompleted): TTask[] {
-  const task = getTaskByID(action.id, tasks);
-
-  // modify
-  task.completed = action.completed;
-  task.updated = now();
-
-  log(`completed`, task.id, action.completed);
-  const ret = sortTasks(tasks);
-  action.store.set(ret, action.id, action.selection);
-  return ret;
-}
-
 export function undo(tasks: TTask[], action: TUndo): TTask[] {
   const rev = action.store.undo();
   // no more undos
@@ -410,23 +396,12 @@ export function moveDown(tasks: TTask[], action: TMoveDown): TTask[] {
   return ret;
 }
 
-export function newTask(tasks: TTask[], action: TNewTask): TTask[] {
-  const task = getTaskByID(action.id, tasks);
-
-  // MODIFY
-
-  // TODO
-
-  log(`updated ${action.id} with`, task.title);
-  const ret = sortTasks(tasks);
-  action.store.set(ret, action.id, action.selection);
-  return ret;
-}
-
 export function clearCompleted(
   tasks: TTask[],
   action: TClearCompleted
 ): TTask[] {
+  let changed = false;
+
   // MODIFY
   for (const task of tasks) {
     if (!task.completed) {
@@ -434,6 +409,7 @@ export function clearCompleted(
     }
     task.hidden = true;
     task.updated = now();
+    changed = true;
   }
 
   log("cleared completed tasks");

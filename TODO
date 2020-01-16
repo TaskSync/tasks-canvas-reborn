@@ -2,7 +2,8 @@
 
 ## BUGS
 - cant click the checkbox on an unfocused task
-- focus leaves a contentEditable after clicking on a table's border
+- cant position the caret when changing the focused task
+- focus leaves a contentEditable element after clicking on a table's border
 - exception after going from the form to the list
 - undo doesnt work on chrome/linux
 
@@ -54,6 +55,8 @@ c logging system
   - extract the store
 - layout
   - blue checkboxes
+- mark parent as completed after all children completed
+  - confirm if needed
 + import / export
   + JSON
   - markdown

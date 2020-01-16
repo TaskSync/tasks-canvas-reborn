@@ -10,33 +10,35 @@ import useStyles from "./styles";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 
 export type ToolbarProps = {
-  tasks: TTask[];
   id: TTaskID;
   selection: TSelection;
   store: Store;
   setFormVisible(id: TTaskID): void;
-  showHidden: boolean;
-  setShowHidden(show: boolean): void;
+  showDeleted: boolean;
+  setShowDeleted(show: boolean): void;
   showCompleted: boolean;
   setShowCompleted(show: boolean): void;
   dispatchList(action: TAction): void;
+  setFocusedID(id: TTaskID): void;
+  setSelection(selection: TSelection): void;
 };
 
 // TODO dividers are 0 height
 export default function(props: ToolbarProps) {
   const {
-    tasks,
     id,
     selection,
     store,
     setFormVisible,
-    showHidden,
-    setShowHidden,
+    showDeleted,
+    setShowDeleted,
     showCompleted,
-    setShowCompleted
+    setShowCompleted,
+    dispatchList,
+    setFocusedID,
+    setSelection
   } = props;
   const classes = useStyles({});
-  const dispatchList = useReducer(reducer, tasks)[1];
 
   const divider = (
     <Divider orientation="vertical" className={classes.divider} />
@@ -50,6 +52,17 @@ export default function(props: ToolbarProps) {
     };
   }
 
+  function handleNewTask() {
+    dispatchList({
+      type: "newline",
+      id,
+      selection,
+      store,
+      setFocusedID,
+      setSelection
+    });
+  }
+
   return (
     <Toolbar className={classes.toolbar}>
       <Button
@@ -60,7 +73,7 @@ export default function(props: ToolbarProps) {
       </Button>
       {divider}
 
-      <Button className={classes.button} onClick={actionHandler("newTask")}>
+      <Button className={classes.button} onClick={handleNewTask}>
         <MenuIcon className={classes.buttonIcon} /> New task
       </Button>
       {divider}
@@ -125,13 +138,15 @@ export default function(props: ToolbarProps) {
         className={classes.button}
         onClick={setShowCompleted.bind(null, !showCompleted)}
         selected={showCompleted}
+        value="null"
       >
         Completed tasks
       </ToggleButton>
       <ToggleButton
         className={classes.button}
-        onClick={setShowHidden.bind(null, !showHidden)}
-        selected={showHidden}
+        onClick={setShowDeleted.bind(null, !showDeleted)}
+        selected={showDeleted}
+        value="null"
       >
         Trash
       </ToggleButton>

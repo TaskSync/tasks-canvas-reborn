@@ -75,7 +75,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // TOP NAV BAR OPTIONS
 
-  const [showHidden, setShowHidden] = useState<boolean>(false);
+  const [showDeleted, setShowDeleted] = useState<boolean>(false);
   const [showCompleted, setShowCompleted] = useState<boolean>(false);
 
   // PERSIST ON PAGE UNLOAD
@@ -376,7 +376,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       }
       // flip the checkbox
       dispatchList({
-        type: "completed",
+        type: "update",
         id,
         completed: !input.checked,
         store,
@@ -461,10 +461,11 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         setFormVisible={setFormVisible}
         showCompleted={showCompleted}
         setShowCompleted={setShowCompleted}
-        showHidden={showHidden}
-        setShowHidden={setShowHidden}
+        showDeleted={showDeleted}
+        setShowDeleted={setShowDeleted}
         store={store}
-        tasks={list}
+        setFocusedID={setFocusedID}
+        setSelection={setSelection}
       />
       <table
         style={formVisible ? { display: "none" } : {}}
@@ -476,13 +477,14 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       >
         <tbody>
           {rootTasks.map((task: TTask) => {
-            if (task.hidden && !showHidden) {
+            if (task.hidden && !showCompleted) {
               return;
             }
+            // children
             const children = [];
             for (const child of getChildren(task.id, list)) {
-              if (child.hidden && !showHidden) {
-                return;
+              if (child.hidden && !showCompleted) {
+                continue;
               }
               children.push(
                 <Task
