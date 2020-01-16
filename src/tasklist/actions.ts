@@ -32,7 +32,9 @@ export type TAction =
   | TRedo
   | TMergePrevLine
   | TMoveUp
-  | TMoveDown;
+  | TMoveDown
+  | TClearCompleted
+  | TNewTask;
 
 // per-task actions
 export type TUpdate = {
@@ -60,6 +62,12 @@ export type TMergePrevLine = {
   setFocusedID(id: TTaskID): void;
   setSelection(selection: TSelection): void;
 } & TTaskActionBase;
+export type TClearCompleted = {
+  type: "clearCompleted";
+} & TTaskActionBase;
+export type TNewTask = {
+  type: "newTask";
+} & TTaskActionBase;
 type TTaskActionBase = {
   store: Store;
   id: TTaskID;
@@ -79,6 +87,36 @@ export type TUndoBase = {
   setManualTaskTitle({ id, title }: { id: TTaskID; title: string }): void;
   store: Store;
 };
+
+export function reducer(state: TTask[], action: TAction): TTask[] {
+  switch (action.type) {
+    case "completed":
+      return completed(state, action);
+    case "indent":
+      return indent(state, action);
+    case "mergePrevLine":
+      return mergePrevLine(state, action);
+    case "newline":
+      return newline(state, action);
+    case "outdent":
+      return outdent(state, action);
+    case "redo":
+      return redo(state, action);
+    case "undo":
+      return undo(state, action);
+    case "update":
+      return update(state, action);
+    case "moveUp":
+      return moveUp(state, action);
+    case "moveDown":
+      return moveDown(state, action);
+    case "clearCompleted":
+      return clearCompleted(state, action);
+    case "newTask":
+      return newTask(state, action);
+  }
+  return state;
+}
 
 export function update(tasks: TTask[], action: TUpdate): TTask[] {
   const task = getTaskByID(action.id, tasks);
@@ -203,7 +241,6 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
   return ret;
 }
 
-//
 /**
  * Split a task into two on Enter key.
  *
@@ -368,6 +405,38 @@ export function moveDown(tasks: TTask[], action: TMoveDown): TTask[] {
   task.previous = next.id;
 
   log(`movedown`, task.id);
+  const ret = sortTasks(tasks);
+  action.store.set(ret, action.id, action.selection);
+  return ret;
+}
+
+export function newTask(tasks: TTask[], action: TNewTask): TTask[] {
+  const task = getTaskByID(action.id, tasks);
+
+  // MODIFY
+
+  // TODO
+
+  log(`updated ${action.id} with`, task.title);
+  const ret = sortTasks(tasks);
+  action.store.set(ret, action.id, action.selection);
+  return ret;
+}
+
+export function clearCompleted(
+  tasks: TTask[],
+  action: TClearCompleted
+): TTask[] {
+  // MODIFY
+  for (const task of tasks) {
+    if (!task.completed) {
+      continue;
+    }
+    task.hidden = true;
+    task.updated = now();
+  }
+
+  log("cleared completed tasks");
   const ret = sortTasks(tasks);
   action.store.set(ret, action.id, action.selection);
   return ret;

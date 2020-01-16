@@ -20,11 +20,15 @@ export default makeStyles((_: Theme) =>
     sectionRight: {
       display: "flex"
     },
+    buttonIcon: {
+      "margin-right": "0.2em"
+    },
     button: {
-      "text-transform": "initial",
-      // TODO important
-      padding: '0 0.4em !important',
-      'min-width': '20px'
+      // TODO importants
+      height: "auto !important",
+      "text-transform": "initial !important",
+      padding: "0 0.4em !important",
+      "min-width": "20px"
     }
   })
 );

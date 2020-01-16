@@ -49,6 +49,9 @@ c logging system
     - sort by date
     - completed tasks
     - trash
+- refactor
+  - react context
+  - extract the store
 - layout
   - blue checkboxes
 + import / export
@@ -99,6 +102,7 @@ c logging system
 # Dev
 
 ## Tests
+- undo / redo (cypress / jsdom)
 - selection helpers (mostly for undo)
 - disable compilation errors
 - tests for helpers

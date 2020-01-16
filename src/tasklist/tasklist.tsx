@@ -15,8 +15,7 @@ import { useBeforeunload } from "react-beforeunload";
 import { setRange } from "selection-ranges";
 import Form from "../form/form";
 import Toolbar from "../toolbar/toolbar";
-import * as actions from "./actions";
-import { TAction } from "./actions";
+import { reducer } from "./actions";
 import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
@@ -25,35 +24,9 @@ import { getSelection, isMacOS, ctrlMetaPressed } from "./utils";
 
 const log = debug("canvas");
 
-function tasksReducer(state: TTask[], action: TAction): TTask[] {
-  switch (action.type) {
-    case "completed":
-      return actions.completed(state, action);
-    case "indent":
-      return actions.indent(state, action);
-    case "mergePrevLine":
-      return actions.mergePrevLine(state, action);
-    case "newline":
-      return actions.newline(state, action);
-    case "outdent":
-      return actions.outdent(state, action);
-    case "redo":
-      return actions.redo(state, action);
-    case "undo":
-      return actions.undo(state, action);
-    case "update":
-      return actions.update(state, action);
-    case "moveUp":
-      return actions.moveUp(state, action);
-    case "moveDown":
-      return actions.moveDown(state, action);
-  }
-  return state;
-}
-
 export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
-  const [list, dispatchList] = useReducer(tasksReducer, tasks || []);
+  const [list, dispatchList] = useReducer(reducer, tasks);
   const rootTasks = list.filter((t: TTask) => !t.parent);
 
   // there always at least one task
@@ -99,6 +72,11 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   let selectionBeforeTyping: TSelection | null = null;
   let titleBeforeTyping: string | null = null;
+
+  // TOP NAV BAR OPTIONS
+
+  const [showHidden, setShowHidden] = useState<boolean>(false);
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
 
   // PERSIST ON PAGE UNLOAD
   // TODO doesnt work with refresh
@@ -476,7 +454,18 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   return (
     <Fragment>
-      <Toolbar />
+      <Toolbar
+        dispatchList={dispatchList}
+        id={focusedID}
+        selection={selection}
+        setFormVisible={setFormVisible}
+        showCompleted={showCompleted}
+        setShowCompleted={setShowCompleted}
+        showHidden={showHidden}
+        setShowHidden={setShowHidden}
+        store={store}
+        tasks={list}
+      />
       <table
         style={formVisible ? { display: "none" } : {}}
         className={classes.table}
@@ -487,8 +476,14 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       >
         <tbody>
           {rootTasks.map((task: TTask) => {
+            if (task.hidden && !showHidden) {
+              return;
+            }
             const children = [];
             for (const child of getChildren(task.id, list)) {
+              if (child.hidden && !showHidden) {
+                return;
+              }
               children.push(
                 <Task
                   key={child.id}
