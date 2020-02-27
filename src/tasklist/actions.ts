@@ -107,8 +107,6 @@ export function reducer(state: TTask[], action: TAction): TTask[] {
       return moveDown(state, action);
     case "clearCompleted":
       return clearCompleted(state, action);
-    case "newTask":
-      return newTask(state, action);
   }
   return state;
 }
@@ -283,7 +281,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
   action.store.set(ret, action.id, action.selection);
   action.setFocusedID(task2.id);
-  action.setSelection([0, 0]);
+  action.setSelection([0, 0, false]);
   return ret;
 }
 
@@ -308,7 +306,7 @@ export function mergePrevLine(tasks: TTask[], action: TMergePrevLine): TTask[] {
   action.setFocusedID(previous.id);
   // place the caret in between the merged titles
   const caret = previous.title.length - task.title.length - 1;
-  action.setSelection([caret, caret]);
+  action.setSelection([caret, caret, false]);
 
   setPrevious(id, undefined, tasks);
   tasks = tasks.filter((t: TTask) => t.id !== id);

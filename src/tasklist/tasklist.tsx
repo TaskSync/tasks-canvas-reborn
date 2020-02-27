@@ -384,6 +384,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     if (isCheckbox(target, event.currentTarget)) {
       const input = target as HTMLInputElement;
       // save changes (if any) using a refNode
+      // TODO save from the focused task, not from the clicked one
       if (nodeRefs[id]) {
         dispatchList({
           type: "update",
