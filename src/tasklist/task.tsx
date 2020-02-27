@@ -9,13 +9,11 @@ import useStyles from "./styles";
 function Task({
   task,
   focusedID,
-  setFocusedNode,
   setNodeRef,
   setFormVisible
 }: {
   task: TTask;
   focusedID: TTaskID;
-  setFocusedNode: (node: HTMLSpanElement) => void;
   setFormVisible: (id: TTaskID) => void;
   setNodeRef: (id: string, node: HTMLSpanElement) => void;
 }) {
@@ -69,10 +67,6 @@ function Task({
               return;
             }
             setNodeRef(id, node as HTMLSpanElement);
-            // TODO get focusedNode from nodeRefs
-            if (id === focusedID) {
-              setFocusedNode(node);
-            }
           }}
         >
           {title}

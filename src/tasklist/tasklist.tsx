@@ -38,10 +38,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   const [focusedID, setFocusedID] = useState<TTaskID>(list[0].id);
   const [selection, setSelection] = useState<TSelection>([0, 0]);
-  let focusedNode: HTMLSpanElement | undefined;
-  function setFocusedNode(node: HTMLSpanElement) {
-    focusedNode = node;
-  }
   let nodeRefs: { [id: string]: HTMLSpanElement } = {};
   function setNodeRef(id: TTaskID, node: HTMLSpanElement) {
     // TODO GC old nodes by comparing with `list`
@@ -129,6 +125,14 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     return selection || def;
   }
 
+  function isTaskVisible(task: TTask): boolean {
+    return Boolean(!task.hidden || showCompleted);
+  }
+
+  function visibleTasks(): TTask[] {
+    return list.filter(isTaskVisible);
+  }
+
   // HANDLERS
 
   /**
@@ -170,28 +174,30 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       event.shiftKey &&
       ctrlMetaPressed(event);
 
-    // SWITCH TASKS
+    // SWITCH THE FOCUSED TASKS
     if (["ArrowDown", "ArrowUp"].includes(event.key) && !isModifierKey(event)) {
-      const index = list.indexOf(task);
+      const listVisible = visibleTasks();
+      const index = listVisible.indexOf(task);
       let newIndex;
       // navigate between tasks
+      // TODO between visible ones only
       if (event.key === "ArrowDown") {
         // move down
-        newIndex = Math.min(index + 1, list.length - 1);
+        newIndex = Math.min(index + 1, listVisible.length - 1);
       } else {
         // move up
         newIndex = Math.max(index - 1, 0);
       }
-      const id = list[newIndex].id;
+      const id = listVisible[newIndex].id;
       if (focusedID !== id) {
         // collapse the selection
         setSelection([selection[1], selection[1]]);
-        setFocusedID(list[newIndex].id);
+        setFocusedID(listVisible[newIndex].id);
       }
       event.preventDefault();
     }
 
-    // MOVE
+    // MOVE TASKS ON THE LIST
     else if (
       ["ArrowDown", "ArrowUp"].includes(event.key) &&
       isModifierKey(event)
@@ -427,9 +433,12 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     });
   }
 
+  // EFFECTS
+
   // restore the focus and selection
   useEffect(() => {
     setDuringUndo(false);
+    const focusedNode = nodeRefs[focusedID];
     if (!focusedNode) {
       return;
     }
@@ -477,13 +486,13 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       >
         <tbody>
           {rootTasks.map((task: TTask) => {
-            if (task.hidden && !showCompleted) {
+            if (!isTaskVisible(task)) {
               return;
             }
             // children
             const children = [];
             for (const child of getChildren(task.id, list)) {
-              if (child.hidden && !showCompleted) {
+              if (!isTaskVisible(child)) {
                 continue;
               }
               children.push(
@@ -491,7 +500,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
                   key={child.id}
                   task={child}
                   focusedID={focusedID}
-                  setFocusedNode={setFocusedNode}
                   setNodeRef={setNodeRef}
                   setFormVisible={setFormVisible}
                 />
@@ -503,7 +511,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
                   key={task.id}
                   task={task}
                   focusedID={focusedID}
-                  setFocusedNode={setFocusedNode}
                   setNodeRef={setNodeRef}
                   setFormVisible={setFormVisible}
                 />

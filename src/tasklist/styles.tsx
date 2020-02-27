@@ -32,7 +32,7 @@ export default makeStyles((_: Theme) =>
     contentCell: {
       width: "30%",
       padding: "0 0.5em",
-      "font-size": "0.85em",
+      "font-size": "0.95em",
       "text-overflow": "ellipsis",
       "white-space": "nowrap"
     },
