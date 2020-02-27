@@ -15,7 +15,7 @@ import { useBeforeunload } from "react-beforeunload";
 import { setRange } from "selection-ranges";
 import Form from "../form/form";
 import Toolbar from "../toolbar/toolbar";
-import { reducer } from "./actions";
+import { reducer, TAction } from "./actions";
 import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
@@ -45,6 +45,9 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const [uiLock, setUILock] = useState<boolean>(false);
   const [focusedID, setFocusedID] = useState<TTaskID>(list[0].id);
   const [selection, setSelection] = useState<TSelection>([0, 0, false]);
+  const [delayedBlurUpdate, setDelayedBlurUpdate] = useState<TAction | null>(
+    null
+  );
   let nodeRefs: { [id: string]: HTMLSpanElement } = {};
   function setNodeRef(id: TTaskID, node: HTMLSpanElement) {
     // TODO GC old nodes by comparing with `list`
@@ -119,6 +122,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   }
 
   function persistSelection(id: TTaskID, node: HTMLElement): TSelection {
+    log("setFocusedID", id);
     setFocusedID(id);
     const def: TSelection = [0, 0, false];
     if (!node.isContentEditable || duringUndo) {
@@ -373,6 +377,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   }
 
   function handleClick(event: MouseEvent<HTMLElement>) {
+    log("clicked");
     const id = getDataID(event);
     const target = event.target as HTMLElement;
 
@@ -403,6 +408,11 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         selection
       });
       event.preventDefault();
+    } else if (delayedBlurUpdate) {
+      // log("delayed blur update", delayedBlurUpdate);
+      dispatchList(delayedBlurUpdate);
+      setDelayedBlurUpdate(null);
+      resetUndoCounters();
     }
 
     // undo for switching tasks
@@ -422,15 +432,16 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
 
     const id = getDataID(event);
-    log("blur save");
-    dispatchList({
+    // timeout not to mess up the caret position when clicked with a mouse
+    const preBlurSelection = getSelection(event.target) ?? selection;
+    const title = event.target.textContent || "";
+    setDelayedBlurUpdate({
       type: "update",
       store,
       id,
-      title: event.target.textContent || "",
-      selection: getSelection(event.target) ?? selection
+      title,
+      selection: preBlurSelection
     });
-    resetUndoCounters();
   }
 
   function handleForm(task: TTask) {
@@ -456,11 +467,14 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     if (!focusedNode) {
       return;
     }
-    // focus if not already
-    if (focusedNode !== document.activeElement) {
+    // force focus if needed, but not just after a blur event
+    // blur vs click vs hooks
+    if (!delayedBlurUpdate && focusedNode !== document.activeElement) {
+      log('forcing focus')
       focusedNode.focus();
     }
-    // restore the selection
+
+    // log("selection", getSelection(focusedNode), focusedNode);
     // log("restore caret", selection);
     setRange(focusedNode, { start: selection[0], end: selection[1] });
     if (selection[2]) {

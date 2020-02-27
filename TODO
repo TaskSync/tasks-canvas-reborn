@@ -1,7 +1,6 @@
 # Desktop
 
 ## BUGS
-- cant click the checkbox on an unfocused task
 - cant position the caret when changing the focused task
 - focus leaves a contentEditable element after clicking on a table's border
 - exception after going from the form to the list
