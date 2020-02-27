@@ -167,7 +167,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
     // always save text before performing other action
     function createRevision() {
-      log("createRevision?");
+      log("createRevision");
       dispatchList({
         type: "update",
         store,

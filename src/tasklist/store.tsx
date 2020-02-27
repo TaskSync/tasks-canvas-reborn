@@ -36,9 +36,9 @@ export class Store {
       return;
     }
     const length = this.revs.length;
-    const atLatestRev = this.revPointer >= length - 1;
+    const atOldestRev = this.revPointer >= length - 1;
 
-    if (!length || atLatestRev) {
+    if (!length || atOldestRev) {
       return;
     }
 

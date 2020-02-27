@@ -323,13 +323,14 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
     return tasks;
   }
 
-  const task = getTaskByID(rev.focusedID, tasks);
+  const task = getTaskByID(rev.focusedID, rev.tasks);
   log("undo", task.title, rev.selection);
 
   // restore the focus
   action.setSelection(rev.selection);
   action.setFocusedID(rev.focusedID);
   // manually set the contentEditable
+  console.log('setManualTaskTitle', task.title)
   action.setManualTaskTitle({ id: rev.focusedID, title: task.title });
 
   return rev.tasks;

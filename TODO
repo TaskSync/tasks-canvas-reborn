@@ -1,8 +1,10 @@
 # Desktop
 
 ## BUGS
+- undo broke
+  - looks like a race condition
+  - selection not always properly saved in the undo timer
 - focus leaves a contentEditable element after clicking on a table's border
-- undo doesnt work on chrome/linux
 
 ## Milestone 1:
 c list UI
