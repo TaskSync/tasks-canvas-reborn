@@ -24,7 +24,10 @@ export type TRev = {
   focusedID: string;
   selection: TSelection;
 };
-export type TSelection = [number, number];
+
+// start, end, isBackwards
+// TODO make it an object?
+export type TSelection = [number, number, boolean];
 
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
   return tasks.filter(t => t.parent === id);

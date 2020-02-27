@@ -20,7 +20,12 @@ import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
-import { getSelection, isMacOS, ctrlMetaPressed } from "./utils";
+import {
+  getSelection,
+  isMacOS,
+  ctrlMetaPressed,
+  flipSelectionBackwards
+} from "./utils";
 
 const log = debug("canvas");
 
@@ -36,8 +41,10 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // FOCUS & SELECTION
 
+  // lock the UI so persisted state cant be different then UIs one
+  const [uiLock, setUILock] = useState<boolean>(false);
   const [focusedID, setFocusedID] = useState<TTaskID>(list[0].id);
-  const [selection, setSelection] = useState<TSelection>([0, 0]);
+  const [selection, setSelection] = useState<TSelection>([0, 0, false]);
   let nodeRefs: { [id: string]: HTMLSpanElement } = {};
   function setNodeRef(id: TTaskID, node: HTMLSpanElement) {
     // TODO GC old nodes by comparing with `list`
@@ -113,7 +120,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   function persistSelection(id: TTaskID, node: HTMLElement): TSelection {
     setFocusedID(id);
-    const def: TSelection = [0, 0];
+    const def: TSelection = [0, 0, false];
     if (!node.isContentEditable || duringUndo) {
       return def;
     }
@@ -145,6 +152,10 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
    * - edit form (shift + enter)
    */
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (uiLock) {
+      event.preventDefault();
+      return;
+    }
     const id = getDataID(event);
     const task = getTaskByID(id);
     const target = event.target as HTMLElement;
@@ -191,7 +202,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       const id = listVisible[newIndex].id;
       if (focusedID !== id) {
         // collapse the selection
-        setSelection([selection[1], selection[1]]);
+        setSelection([selection[1], selection[1], false]);
         setFocusedID(listVisible[newIndex].id);
       }
       event.preventDefault();
@@ -342,6 +353,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         // handle a time-based revision
         setUndoTimer(setTimeout(createRev, store.msPerUndo));
         function createRev() {
+          setUILock(true);
           log("undo timer");
           // get the newest version
           const title = nodeRefs[id].textContent || "";
@@ -354,6 +366,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
             selection
           });
           resetUndoCounters();
+          setUILock(false);
         }
       }
     }
@@ -449,6 +462,9 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     // restore the selection
     // log("restore caret", selection);
     setRange(focusedNode, { start: selection[0], end: selection[1] });
+    if (selection[2]) {
+      flipSelectionBackwards();
+    }
   });
 
   // manually update the contentEditable (for undo / redo)
