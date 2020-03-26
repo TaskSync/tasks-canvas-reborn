@@ -32,6 +32,8 @@ c logging system
 + render attrs on the list view
   c notes
   - duedate
+- research google tasks api regarding sorting and the `previous` field
+  - check if dynamic per results or fixed per all the tasks in the DB
 + top navbar
   - left (actions)
     - clear completed

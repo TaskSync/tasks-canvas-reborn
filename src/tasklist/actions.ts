@@ -2,7 +2,7 @@ import assert from "assert";
 import debug from "debug";
 import {
   getNext,
-  setPrevious,
+  move,
   getVisiblePrevious,
   getSiblings,
   getTaskByID,
@@ -173,20 +173,17 @@ export function indent(tasks: TTask[], action: TIndent): TTask[] {
   // place after the last child of the previous one
   if (previousChildren.length) {
     const last = previousChildren[previousChildren.length - 1];
-    setPrevious(task.id, last.id, tasks);
+    move(task.id, last.id, tasks);
   } else {
-    setPrevious(task.id, undefined, tasks);
+    move(task.id, undefined, tasks);
   }
   task.parent = newParent.id;
   task.updated = now();
 
   // merge children of the current task (if any)
-  let firstChild = true;
+  let position = task.position;
   for (const child of children) {
-    if (firstChild) {
-      child.previous = task.id;
-      firstChild = false;
-    }
+    child.position = ++position;
     child.parent = newParent.id;
     child.updated = now();
   }
@@ -212,24 +209,23 @@ export function outdent(tasks: TTask[], action: TOutdent): TTask[] {
   // MODIFY
 
   // become the parent of next (visible) child siblings
-  let lastSibling;
-  if (rightSiblings.length) {
-    rightSiblings[0].previous = undefined;
-  }
+  let previousID: TTaskID | undefined = undefined;
   for (const sibling of rightSiblings) {
     sibling.parent = task.id;
     sibling.updated = now();
-    lastSibling = sibling;
+    move(sibling.id, previousID, tasks);
+    previousID = sibling.id;
   }
 
   // place after the old parent
-  task.previous = task.parent;
+  const parent = task.parent;
   task.parent = undefined;
+  move(task.id, parent, tasks);
   task.updated = now();
 
   // link the next root task to this one or the last sibling (if any)
   if (nextOnRootLevel) {
-    nextOnRootLevel.previous = task.id;
+    move(nextOnRootLevel.id, task.id, tasks);
   }
 
   log(`outdent ${action.id}`);
@@ -251,7 +247,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
 
   log(`newline`, action.id);
 
-  const task2: TTask = createTask({ title: task2Title });
+  const newTask: TTask = createTask({ title: task2Title });
 
   // modify
   task.title = task1Title;
@@ -263,24 +259,21 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
   if (hasChildren) {
     const first = getFirstChild(task.id, tasks)!;
     assert(first);
-    first.previous = task2.id;
+    tasks.push(newTask);
+    move(newTask.id, undefined, tasks);
   }
   // child task or a root level non-parent task
   else {
-    const nextSibling = getNext(task.id, tasks);
     // modify AFTER the lookup
-    task2.parent = task.parent;
-    task2.previous = task.id;
-    if (nextSibling) {
-      nextSibling.previous = task2.id;
-    }
+    newTask.parent = task.parent;
+    tasks.push(newTask);
+    move(newTask.id, task.id, tasks);
   }
 
-  tasks.push(task2);
   const ret = sortTasks(tasks);
 
   action.store.set(ret, action.id, action.selection);
-  action.setFocusedID(task2.id);
+  action.setFocusedID(newTask.id);
   action.setSelection([0, 0, false]);
   return ret;
 }
@@ -308,7 +301,7 @@ export function mergePrevLine(tasks: TTask[], action: TMergePrevLine): TTask[] {
   const caret = previous.title.length - task.title.length - 1;
   action.setSelection([caret, caret, false]);
 
-  setPrevious(id, undefined, tasks);
+  move(id, undefined, tasks);
   tasks = tasks.filter((t: TTask) => t.id !== id);
 
   const ret = sortTasks(tasks);
@@ -330,7 +323,7 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
   action.setSelection(rev.selection);
   action.setFocusedID(rev.focusedID);
   // manually set the contentEditable
-  console.log('setManualTaskTitle', task.title)
+  console.log("setManualTaskTitle", task.title);
   action.setManualTaskTitle({ id: rev.focusedID, title: task.title });
 
   return rev.tasks;
@@ -364,10 +357,18 @@ export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
     return tasks;
   }
 
-  const previous = getTaskByID(task.previous!, tasks);
+  const previous = getVisiblePrevious(task.id, tasks, true);
+  // const previous = getTaskByID(task.previous!, tasks);
+  if (!previous) {
+    return tasks;
+  }
+  const targetPrevious = getVisiblePrevious(previous.id, tasks, true);
+  if (!targetPrevious) {
+    return tasks;
+  }
+
   // put above `previous`
-  setPrevious(id, previous.previous, tasks);
-  previous.previous = task.id;
+  move(id, targetPrevious.id, tasks);
 
   log(`moveup`, task.id);
   const ret = sortTasks(tasks);
@@ -385,9 +386,8 @@ export function moveDown(tasks: TTask[], action: TMoveDown): TTask[] {
     return tasks;
   }
 
-  // put after `next`
-  setPrevious(next.id, task.previous, tasks);
-  task.previous = next.id;
+  // put under `next`
+  move(task.id, next.id, tasks);
 
   log(`movedown`, task.id);
   const ret = sortTasks(tasks);

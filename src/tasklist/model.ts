@@ -1,5 +1,6 @@
 import assert from "assert";
 import uniqid from "uniqid";
+import { sortBranch } from "./sorting";
 
 export type TTaskID = string;
 export type TTask = {
@@ -11,7 +12,7 @@ export type TTask = {
   duedate: string;
   parent?: TTaskID;
   // user sorting
-  previous?: TTaskID;
+  position: number;
   // TODO iso date ?
   created: number;
   // TODO iso date ?
@@ -26,7 +27,7 @@ export type TRev = {
 };
 
 // start, end, isBackwards
-// TODO make it an object?
+// TODO make it an object
 export type TSelection = [number, number, boolean];
 
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
@@ -34,7 +35,12 @@ export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
 }
 
 export function getFirstChild(id: TTaskID, tasks: TTask[]): TTask | null {
-  return getChildren(id, tasks).find(t => t.previous === undefined) || null;
+  const children = getChildren(id, tasks);
+  return (
+    children.reduce((prev, task) => {
+      return prev?.position < task.position ? prev : task;
+    }) || null
+  );
 }
 
 export function getTaskByID(id: TTaskID, tasks: TTask[]): TTask {
@@ -64,6 +70,7 @@ export function getSiblings(
     let sibling: TTask | null = getTaskByID(id, tasks);
     do {
       sibling = getVisibleNext(sibling!.id, tasks, true);
+
       if (sibling) {
         siblings.push(sibling);
       }
@@ -77,11 +84,13 @@ export function getSiblings(
  * Returns the previous visible task on the list.
  *
  * Different then user-sorting previous (task.previous).
+ *
+ * TODO how many steps (eg 2-nd previous)
  */
 export function getVisiblePrevious(
   id: TTaskID,
   tasks: TTask[],
-  sameLevel = false
+  sameLevel = false,
 ): TTask | null {
   const task = getTaskByID(id, tasks);
   let index = tasks.indexOf(task);
@@ -122,30 +131,45 @@ export function getVisibleNext(
 
 /**
  * Set a new previous for a task and update the old `next`.
+ *
+ * TODO include in the sync write in taskbot-engine
+ *   should trigged a "move" cmd for each affected task
  */
-export function setPrevious(
+export function move(
   id: TTaskID,
   previous: TTaskID | undefined,
   tasks: TTask[]
-) {
-  const task = getTaskByID(id, tasks);
-  const next = getNext(id, tasks);
+): void {
+  let task = getTaskByID(id, tasks);
+  const previousTask = previous ? getTaskByID(previous, tasks) : null;
 
-  // keep the left-linked list consistent
-  if (next) {
-    next.previous = task.previous;
+  if (previousTask) {
+    task.position = previousTask.position + 1;
   }
-  task.previous = previous;
+
+  let next: TTask | null;
+  while ((next = getNext(task.id, tasks))) {
+    // update the right siblings
+    next.position = task.position + 1;
+    task = next;
+  }
 }
 
 /**
  * Returns the task pointing to ID as the previous one (if any).
  *
  * User sorting, not the currently visible order.
+ *
+ * TODO align with new sorting
  */
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
-  const next = tasks.find(task => task.previous === id);
-  return next || null;
+  const siblings = sortBranch(getSiblings(id, tasks));
+
+  return (
+    siblings.reduce((prev, task) => {
+      return prev?.position < task.position ? prev : task;
+    }) || null
+  );
 }
 
 // TODO iso date?
@@ -160,7 +184,8 @@ export function createTask(task: Partial<TTask> = {}): TTask {
     content: "",
     duedate: "",
     created: now(),
-    updated: now()
+    updated: now(),
+    position: 0
   };
   return {
     ...defaults,

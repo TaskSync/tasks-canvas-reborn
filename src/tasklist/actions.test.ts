@@ -933,6 +933,8 @@ describe("actions", () => {
 export function factory(tasks: string): TTask[] {
   let previousRoot: TTaskID | undefined;
   let previousChild: TTaskID | undefined;
+  let previousChildPosition: number = 0;
+  let previousRootPosition: number = 0;
   const ret: TTask[] = [];
   tasks = normalize(tasks);
 
@@ -943,16 +945,18 @@ export function factory(tasks: string): TTask[] {
     }
     assert(!isChild || previousChild || previousRoot);
     const attrs: Partial<TTask> = isChild
-      ? { parent: previousRoot, previous: previousChild }
-      : { previous: previousRoot };
+      ? { parent: previousRoot, position: previousChildPosition + 1 }
+      : { position: previousRootPosition + 1 };
     const title = line.replace(/^-+ /, "");
 
     const task = t(title, attrs);
 
     if (isChild) {
       previousChild = task.id;
+      previousChildPosition = task.position;
     } else {
       previousRoot = task.id;
+      previousRootPosition = task.position;
     }
     ret.push(task);
   }
@@ -989,9 +993,9 @@ export function t(text: string, task?: Partial<TTask>): TTask {
     title: text,
     updated: now(),
     created: now(),
-    previous: task?.previous || undefined,
+    position: task?.position || 0,
     parent: task?.parent || undefined,
-    content: '',
-    duedate: ''
+    content: "",
+    duedate: ""
   };
 }
