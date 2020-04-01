@@ -30,6 +30,10 @@ export type TRev = {
 // TODO make it an object
 export type TSelection = [number, number, boolean];
 
+export function getRootTasks(tasks: TTask[]): TTask[] {
+  return tasks.filter(t => t.parent === undefined);
+}
+
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
   return tasks.filter(t => t.parent === id);
 }
@@ -90,7 +94,7 @@ export function getSiblings(
 export function getVisiblePrevious(
   id: TTaskID,
   tasks: TTask[],
-  sameLevel = false,
+  sameLevel = false
 ): TTask | null {
   const task = getTaskByID(id, tasks);
   let index = tasks.indexOf(task);
@@ -137,22 +141,43 @@ export function getVisibleNext(
  */
 export function move(
   id: TTaskID,
-  previous: TTaskID | undefined,
+  previousID: TTaskID | undefined,
   tasks: TTask[]
 ): void {
-  let task = getTaskByID(id, tasks);
-  const previousTask = previous ? getTaskByID(previous, tasks) : null;
+  debugger;
+  const task = getTaskByID(id, tasks);
+  const toMove = previousID
+    ? getSiblings(previousID, tasks, "right")
+    : getRootTasks(tasks);
 
-  if (previousTask) {
-    task.position = previousTask.position + 1;
+  for (const task of toMove) {
+    task.position++;
   }
 
-  let next: TTask | null;
-  while ((next = getNext(task.id, tasks))) {
-    // update the right siblings
-    next.position = task.position + 1;
-    task = next;
+  task.position = previousID ? getTaskByID(previousID, tasks).position + 1 : 0;
+}
+
+/**
+ * Add a new task at a specified position.
+ */
+export function add(
+  newTask: TTask,
+  previousID: TTaskID | undefined,
+  tasks: TTask[]
+): void {
+  const toMove = previousID
+    ? getSiblings(previousID, tasks, "right")
+    : getRootTasks(tasks);
+
+  for (const task of toMove) {
+    task.position++;
   }
+
+  newTask.position = previousID
+    ? getTaskByID(previousID, tasks).position + 1
+    : 0;
+
+  tasks.push(newTask);
 }
 
 /**

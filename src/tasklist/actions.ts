@@ -13,7 +13,8 @@ import {
   TSelection,
   TTask,
   TTaskID,
-  getVisibleNext
+  getVisibleNext,
+  add
 } from "./model";
 import { sortTasks } from "./sorting";
 import Store from "./store";
@@ -266,8 +267,7 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
   else {
     // modify AFTER the lookup
     newTask.parent = task.parent;
-    tasks.push(newTask);
-    move(newTask.id, task.id, tasks);
+    add(newTask, task.id, tasks);
   }
 
   const ret = sortTasks(tasks);

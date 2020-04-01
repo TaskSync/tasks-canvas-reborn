@@ -442,6 +442,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       title,
       selection: preBlurSelection
     });
+    log("delayedBlurUpdate");
   }
 
   function handleForm(task: TTask) {
@@ -470,7 +471,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     // force focus if needed, but not just after a blur event
     // blur vs click vs hooks
     if (!delayedBlurUpdate && focusedNode !== document.activeElement) {
-      log('forcing focus')
+      log("forcing focus");
       focusedNode.focus();
     }
 
