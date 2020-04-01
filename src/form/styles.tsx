@@ -8,7 +8,7 @@ export default makeStyles((_: Theme) =>
       width: "100%",
       "border-color": "lightgray",
       "border-width": "2px",
-      outline: "0px solid transparent",
+      outline: "0px solid transparent"
     },
     checkbox: {
       // TODO WTF?

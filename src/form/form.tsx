@@ -28,7 +28,7 @@ export default function({
 
   function onCheckbox() {
     setEdited({ ...edited, completed: !edited.completed });
-    setFocusTextarea(false)
+    setFocusTextarea(false);
   }
 
   function onESC(event: KeyboardEvent<HTMLElement>) {
@@ -48,7 +48,7 @@ export default function({
 
   useEffect(() => {
     if (!focusTextarea) {
-      return
+      return;
     }
     setTimeout(() => {
       if (textareaNode) {

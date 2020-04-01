@@ -265,7 +265,6 @@ export function newline(tasks: TTask[], action: TNewline): TTask[] {
   }
   // child task or a root level non-parent task
   else {
-    // modify AFTER the lookup
     newTask.parent = task.parent;
     add(newTask, task.id, tasks);
   }

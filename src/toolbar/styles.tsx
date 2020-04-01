@@ -24,7 +24,7 @@ export default makeStyles((_: Theme) =>
       "margin-right": "0.2em"
     },
     button: {
-      'border-width': '0 !important',
+      "border-width": "0 !important",
       // TODO importants
       height: "auto !important",
       "text-transform": "initial !important",

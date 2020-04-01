@@ -17,8 +17,6 @@ import { TSelection, TTask, TTaskID } from "./model";
 import MockStore from "./store.mock";
 import { factory, normalize, tasksToString } from "./test-utils";
 
-debugger;
-
 describe("actions", () => {
   // mock
   const store = new MockStore();
@@ -36,6 +34,7 @@ describe("actions", () => {
     ) {
       const tasks = factory(input);
       const expected = normalize(output);
+      debugger;
       // @ts-ignore
       const after = action(tasks, {
         id,
@@ -52,7 +51,7 @@ describe("actions", () => {
     - 2
     - 3`;
 
-  describe("newline", () => {
+  describe.only("newline", () => {
     // mock
     const newlineMock: Pick<
       TNewline,
@@ -66,7 +65,7 @@ describe("actions", () => {
 
     const tests = [
       [
-        "fist root",
+        "first root",
         // input
         `- 1
          - 2`,

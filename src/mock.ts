@@ -7,8 +7,8 @@ export default [
     title: "1 foo",
     updated: now(),
     created: now(),
-    content: '',
-    duedate: ''
+    content: "",
+    duedate: ""
   },
   {
     id: "1-2 foo",
@@ -17,8 +17,8 @@ export default [
     title: "1-2 foo",
     updated: now(),
     created: now(),
-    content: '',
-    duedate: ''
+    content: "",
+    duedate: ""
   },
   {
     id: "3 foo",
@@ -26,8 +26,8 @@ export default [
     title: "3 foo",
     updated: now(),
     created: now(),
-    content: '',
-    duedate: ''
+    content: "",
+    duedate: ""
   },
   {
     id: "4 foo",
@@ -35,7 +35,7 @@ export default [
     title: "4 foo",
     updated: now(),
     created: now(),
-    content: '',
-    duedate: ''
+    content: "",
+    duedate: ""
   }
 ] as TTask[];

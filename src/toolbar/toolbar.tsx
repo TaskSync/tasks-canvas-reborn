@@ -2,12 +2,12 @@ import Button from "@material-ui/core/Button";
 import Divider from "@material-ui/core/Divider";
 import Toolbar from "@material-ui/core/Toolbar";
 import MenuIcon from "@material-ui/icons/Menu";
-import React, { useReducer } from "react";
-import { TAction, reducer } from "../tasklist/actions";
-import { TTask, TTaskID, TSelection } from "../tasklist/model";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import React from "react";
+import { TAction } from "../tasklist/actions";
+import { TTaskID, TSelection } from "../tasklist/model";
 import Store from "../tasklist/store";
 import useStyles from "./styles";
-import ToggleButton from "@material-ui/lab/ToggleButton";
 
 export type ToolbarProps = {
   id: TTaskID;
