@@ -138,44 +138,47 @@ export function getVisibleNext(
  *
  * TODO include in the sync write in taskbot-engine
  *   should trigged a "move" cmd for each affected task
+ *
+ * TODO merge with `add`.
  */
 export function move(
   id: TTaskID,
   previousID: TTaskID | undefined,
   tasks: TTask[]
 ): void {
-  debugger;
   const task = getTaskByID(id, tasks);
-  const toMove = previousID
-    ? getSiblings(previousID, tasks, "right")
-    : getRootTasks(tasks);
-
-  for (const task of toMove) {
-    task.position++;
-  }
-
-  task.position = previousID ? getTaskByID(previousID, tasks).position + 1 : 0;
+  // TODO lodash
+  tasks.splice(tasks.indexOf(task), 1);
+  add(task, previousID, tasks);
 }
 
 /**
  * Add a new task at a specified position.
+ *
+ * TODO merge with `move`.
  */
 export function add(
   newTask: TTask,
   previousID: TTaskID | undefined,
   tasks: TTask[]
 ): void {
-  const toMove = previousID
-    ? getSiblings(previousID, tasks, "right")
+  const previous = previousID ? getTaskByID(previousID, tasks) : null;
+  const parentID = previous?.parent || newTask.parent;
+  const toShift = previous
+    ? getSiblings(previous.id, tasks, "right")
+    : parentID
+    ? getChildren(parentID, tasks)
     : getRootTasks(tasks);
 
-  for (const task of toMove) {
+  if (previous) {
+    newTask.parent = previous.parent;
+  }
+
+  for (const task of toShift) {
     task.position++;
   }
 
-  newTask.position = previousID
-    ? getTaskByID(previousID, tasks).position + 1
-    : 0;
+  newTask.position = previous ? previous.position + 1 : 0;
 
   tasks.push(newTask);
 }

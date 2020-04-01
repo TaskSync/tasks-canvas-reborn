@@ -36,7 +36,7 @@ export function sortTasks(
 /**
  * Return a new, sorted array.
  */
-function sortBranch(tasks: TTask[]): TTask[] {
+export function sortBranch(tasks: TTask[]): TTask[] {
   return [...tasks].sort((a: TTask, b: TTask) => {
     return a.position < b.position ? -1 : 1;
   });
