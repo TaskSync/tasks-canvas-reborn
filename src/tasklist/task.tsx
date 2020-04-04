@@ -25,7 +25,7 @@ function Task({
   const checkboxNode = (
     <Checkbox
       data-checkbox="true"
-      checked={task.completed}
+      checked={task.completed || false}
       className={classes.checkbox}
       disableRipple
     />
