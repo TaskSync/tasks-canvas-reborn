@@ -409,6 +409,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       });
       event.preventDefault();
       // BLUR UPDATE (delayed)
+      // TODO check if needed at all
     } else if (delayedBlurUpdate) {
       // log("delayed blur update", delayedBlurUpdate);
       dispatchList(delayedBlurUpdate);
