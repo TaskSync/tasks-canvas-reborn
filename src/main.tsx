@@ -6,10 +6,13 @@ import Store from "./tasklist/store";
 import TaskList from "./tasklist/tasklist";
 
 const store = new Store();
+window.store = store
+// const tasks = store.get() || mockTasks
+const tasks = mockTasks
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <TaskList tasks={store.get() || mockTasks} store={store} />,
+    <TaskList tasks={tasks} store={store} />,
     document.body as HTMLElement
   );
 });

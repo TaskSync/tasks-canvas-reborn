@@ -1,10 +1,6 @@
 # Desktop
 
 ## BUGS
-- cant position the caret when changing the focused task
-  - work in chrome/linux
-  - broken in chrome/macos
-    - `range.commonAncestorContainer.parentNode == editableDiv`
 - undo broke
   - looks like a race condition
   - selection not always properly saved in the undo timer

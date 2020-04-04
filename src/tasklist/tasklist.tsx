@@ -15,8 +15,15 @@ import { useBeforeunload } from "react-beforeunload";
 import { setRange } from "selection-ranges";
 import Form from "../form/form";
 import Toolbar from "../toolbar/toolbar";
-import { reducer, TAction } from "./actions";
-import { getChildren, createTask, TSelection, TTask, TTaskID } from "./model";
+import { reducer } from "./actions";
+import {
+  getChildren,
+  createTask,
+  TSelection,
+  TTask,
+  TTaskID,
+  getRootTasks
+} from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
 import Task from "./task";
@@ -32,7 +39,9 @@ const log = debug("canvas");
 export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(reducer, tasks);
-  const rootTasks = list.filter((t: TTask) => !t.parent);
+  const rootTasks = getRootTasks(list);
+
+  console.dir(list.map(t => t.title));
 
   // there always at least one task
   if (!list.length) {
@@ -45,9 +54,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const [uiLock, setUILock] = useState<boolean>(false);
   const [focusedID, setFocusedID] = useState<TTaskID>(list[0].id);
   const [selection, setSelection] = useState<TSelection>([0, 0, false]);
-  const [delayedBlurUpdate, setDelayedBlurUpdate] = useState<TAction | null>(
-    null
-  );
   let nodeRefs: { [id: string]: HTMLSpanElement } = {};
   function setNodeRef(id: TTaskID, node: HTMLSpanElement) {
     // TODO GC old nodes by comparing with `list`
@@ -67,6 +73,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   // counts the chars typed / deleted per task since the last undo snapshot
   const [charsSinceUndo, setCharsSinceUndo] = useState<number>(0);
   const [undoTimer, setUndoTimer] = useState<number | undefined>(undefined);
+  // current render is triggered by undo / redo
   const [duringUndo, setDuringUndo] = useState<boolean>(false);
   // manually set the contentEditable
   const [manualTaskTitle, setManualTaskTitle] = useState<{
@@ -165,7 +172,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const target = event.target as HTMLElement;
     titleBeforeTyping = target.textContent || "";
 
-    // always save text before performing other action
+    // always save text before performing another action
     function createRevision() {
       log("createRevision");
       dispatchList({
@@ -355,8 +362,8 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         resetUndoCounters();
       } else if (undoTimer === undefined) {
         // handle a time-based revision
-        setUndoTimer(setTimeout(createRev, store.msPerUndo));
-        function createRev() {
+        setUndoTimer(setTimeout(createUndoRev, store.msPerUndo));
+        function createUndoRev() {
           setUILock(true);
           log("undo timer");
           // get the newest version
@@ -408,13 +415,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         selection
       });
       event.preventDefault();
-      // BLUR UPDATE (delayed)
-      // TODO check if needed at all
-    } else if (delayedBlurUpdate) {
-      // log("delayed blur update", delayedBlurUpdate);
-      dispatchList(delayedBlurUpdate);
-      setDelayedBlurUpdate(null);
-      resetUndoCounters();
     }
 
     // undo for switching tasks
@@ -436,14 +436,13 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     const id = getDataID(event);
     const preBlurSelection = getSelection(event.target) ?? selection;
     const title = event.target.textContent || "";
-    setDelayedBlurUpdate({
+    dispatchList({
       type: "update",
       store,
       id,
       title,
       selection: preBlurSelection
     });
-    log("delayedBlurUpdate");
   }
 
   function handleForm(task: TTask) {
@@ -464,25 +463,31 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // restore the focus and selection
   useEffect(() => {
-    if (!duringUndo) {
-      return
-    }
     setDuringUndo(false);
     const focusedNode = nodeRefs[focusedID];
     if (!focusedNode) {
       return;
     }
-    // force focus if needed, but not just after a blur event
-    // blur vs click vs hooks
-    if (!delayedBlurUpdate && focusedNode !== document.activeElement) {
+    // force focus if needed
+    if (focusedNode !== document.activeElement) {
       log("forcing focus");
       focusedNode.focus();
     }
 
+    // set the selection only if not currently set
+    const currentSelection = getSelection(focusedNode);
+    if (
+      currentSelection &&
+      currentSelection[0] === selection[0] &&
+      currentSelection[1] === selection[1]
+    ) {
+      return
+    }
     setRange(focusedNode, { start: selection[0], end: selection[1] });
     if (selection[2]) {
       flipSelectionBackwards();
     }
+    log("restored the selection", selection);
   });
 
   // manually update the contentEditable (for undo / redo)

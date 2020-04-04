@@ -133,7 +133,7 @@ export function update(tasks: TTask[], action: TUpdate): TTask[] {
     }
   }
 
-  if (!Object.keys(newFields)) {
+  if (!Object.keys(newFields).length) {
     return tasks;
   }
 
@@ -325,6 +325,9 @@ export function undo(tasks: TTask[], action: TUndo): TTask[] {
   console.log("setManualTaskTitle", task.title);
   action.setManualTaskTitle({ id: rev.focusedID, title: task.title });
 
+  console.log("rev");
+  console.dir(rev.tasks.map(t => t.title));
+
   return rev.tasks;
 }
 
@@ -357,7 +360,6 @@ export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
   }
 
   const previous = getVisiblePrevious(task.id, tasks, true);
-  // const previous = getTaskByID(task.previous!, tasks);
   if (!previous) {
     return tasks;
   }
@@ -366,7 +368,7 @@ export function moveUp(tasks: TTask[], action: TMoveUp): TTask[] {
     return tasks;
   }
 
-  // put above `previous`
+  // put above `targetPrevious`
   move(id, targetPrevious.id, tasks);
 
   log(`moveup`, task.id);
