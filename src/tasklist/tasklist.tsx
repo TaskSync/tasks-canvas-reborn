@@ -408,6 +408,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         selection
       });
       event.preventDefault();
+      // BLUR UPDATE (delayed)
     } else if (delayedBlurUpdate) {
       // log("delayed blur update", delayedBlurUpdate);
       dispatchList(delayedBlurUpdate);
@@ -432,7 +433,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
     }
 
     const id = getDataID(event);
-    // timeout not to mess up the caret position when clicked with a mouse
     const preBlurSelection = getSelection(event.target) ?? selection;
     const title = event.target.textContent || "";
     setDelayedBlurUpdate({
@@ -463,6 +463,9 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // restore the focus and selection
   useEffect(() => {
+    if (!duringUndo) {
+      return
+    }
     setDuringUndo(false);
     const focusedNode = nodeRefs[focusedID];
     if (!focusedNode) {
@@ -475,8 +478,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       focusedNode.focus();
     }
 
-    // log("selection", getSelection(focusedNode), focusedNode);
-    // log("restore caret", selection);
     setRange(focusedNode, { start: selection[0], end: selection[1] });
     if (selection[2]) {
       flipSelectionBackwards();

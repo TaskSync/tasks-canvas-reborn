@@ -138,8 +138,6 @@ export function getVisibleNext(
  *
  * TODO include in the sync write in taskbot-engine
  *   should trigged a "move" cmd for each affected task
- *
- * TODO merge with `add`.
  */
 export function move(
   id: TTaskID,
@@ -187,8 +185,6 @@ export function add(
  * Returns the task pointing to ID as the previous one (if any).
  *
  * User sorting, not the currently visible order.
- *
- * TODO align with new sorting
  */
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
   const siblings = sortBranch(getSiblings(id, tasks));
