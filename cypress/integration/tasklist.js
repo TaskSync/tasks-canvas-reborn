@@ -17,10 +17,19 @@ context("TaskList", () => {
     cy.get("span[contenteditable]:eq(2)")
       .click()
       .type(" ccc")
-      // trigger undo, 3 times
+      // start undos
+      // trigger undo
       .type("{meta}z")
+      // trigger undo
       .type("{meta}z")
-      .type("{meta}z");
+      // trigger undo
+      .type("{meta}z")
+      // trigger undo
+      .type("{meta}z")
+      // trigger undo
+      .type("{meta}z")
+      // trigger undo
+      .type("{meta}z")
 
     // assert
     cy.get("span[contenteditable]:eq(0)").should("have.text", "1 foo");

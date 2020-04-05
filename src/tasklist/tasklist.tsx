@@ -41,8 +41,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const [list, dispatchList] = useReducer(reducer, tasks);
   const rootTasks = getRootTasks(list);
 
-  console.dir(list.map(t => t.title));
-
   // there always at least one task
   if (!list.length) {
     list.push(createTask());
@@ -52,11 +50,16 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // lock the UI so persisted state cant be different then UIs one
   const [uiLock, setUILock] = useState<boolean>(false);
-  const [focusedID, setFocusedID] = useState<TTaskID>(list[0].id);
+  const [focusedID, setFocusedIDInternal] = useState<TTaskID>(list[0].id);
+  function setFocusedID(id: TTaskID) {
+    resetUndoCounters();
+    setFocusedIDInternal(id);
+  }
   const [selection, setSelection] = useState<TSelection>([0, 0, false]);
-  let nodeRefs: { [id: string]: HTMLSpanElement } = {};
+  const [nodeRefs] = useState<{ [id: string]: HTMLSpanElement }>({});
   function setNodeRef(id: TTaskID, node: HTMLSpanElement) {
     // TODO GC old nodes by comparing with `list`
+    // avoid the hook setter, as re-rendering isnt needed here
     nodeRefs[id] = node;
   }
 
@@ -129,7 +132,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
   }
 
   function persistSelection(id: TTaskID, node: HTMLElement): TSelection {
-    log("setFocusedID", id);
     setFocusedID(id);
     const def: TSelection = [0, 0, false];
     if (!node.isContentEditable || duringUndo) {
@@ -336,7 +338,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       return;
     }
 
-    // TASK SWITCHING
+    // CARET NAVIGATION
     if (["ArrowRight", "ArrowLeft"].includes(event.key)) {
       persistSelection(id, target);
       return;
@@ -463,7 +465,6 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
 
   // restore the focus and selection
   useEffect(() => {
-    setDuringUndo(false);
     const focusedNode = nodeRefs[focusedID];
     if (!focusedNode) {
       return;
@@ -474,14 +475,19 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       focusedNode.focus();
     }
 
-    // set the selection only if not currently set
+    if (!duringUndo) {
+      // restore the selection only when undoing
+      return;
+    }
+    setDuringUndo(false);
     const currentSelection = getSelection(focusedNode);
     if (
       currentSelection &&
       currentSelection[0] === selection[0] &&
       currentSelection[1] === selection[1]
     ) {
-      return
+      // restore the selection only if not currently set
+      return;
     }
     setRange(focusedNode, { start: selection[0], end: selection[1] });
     if (selection[2]) {

@@ -58,19 +58,12 @@ function Task({
             <ArrowRightIcon onClick={setFormVisible.bind(null, id)} />
           </a>
         ) : null}
-        <span
-          contentEditable={true}
-          suppressContentEditableWarning={true}
+        <EditFieldMemo
           className={classes.title}
-          ref={node => {
-            if (!node) {
-              return;
-            }
-            setNodeRef(id, node as HTMLSpanElement);
-          }}
-        >
-          {title}
-        </span>
+          id={id}
+          setNodeRef={setNodeRef}
+          content={title}
+        />
       </td>
       <td className={classnames(classes.cell, classes.contentCell)}>
         <a
@@ -84,5 +77,34 @@ function Task({
     </tr>
   );
 }
+
+export type EditFieldProps = {
+  id: string;
+  content: string;
+  setNodeRef: (id: string, node: HTMLSpanElement) => void;
+  className: string;
+};
+export function EditField(props: EditFieldProps) {
+  const { id, setNodeRef, className, content } = props;
+
+  return (
+    <span
+      contentEditable={true}
+      suppressContentEditableWarning={true}
+      className={className}
+      ref={node => {
+        if (!node) {
+          return;
+        }
+        setNodeRef(id, node as HTMLSpanElement);
+      }}
+    >
+      {content}
+    </span>
+  );
+}
+
+// stop re-rendering and messing up with a contentEditable selection
+const EditFieldMemo = React.memo(EditField, () => true);
 
 export default Task;
