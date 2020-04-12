@@ -29,10 +29,10 @@ Please [report any issues](https://github.com/TaskSync/tasks-canvas-reborn/issue
 - persisting in localStorage
 - undo / redo (structural)
 - edit form
+- toolbar
 
 ### TODO
 
-- toolbar
 - task lists
 - syncing with Google Tasks API
   - using [TaskBot's engine](https://github.com/TaskSync/TaskBot.app)
