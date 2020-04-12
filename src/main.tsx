@@ -6,8 +6,8 @@ import Store from "./tasklist/store";
 import TaskList from "./tasklist/tasklist";
 
 const store = new Store();
-// const tasks = store.get() || mockTasks
-const tasks = mockTasks
+const tasks = store.get() || mockTasks
+// const tasks = mockTasks
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(

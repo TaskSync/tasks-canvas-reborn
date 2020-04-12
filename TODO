@@ -1,6 +1,9 @@
 # Desktop
 
 ## BUGS
+- caret position when navigating up/down should be persisted
+  - introduce `restoreSelection` hook?
+- select & delete doesnt preserve selection
 - undo broke
   - looks like a race condition
   - selection not always properly saved in the undo timer
@@ -87,7 +90,7 @@ c logging system
   - search as you type
   - SPECIAL+N to switch
   - ESC to quit
-  - list of task lists on the task list (yes...)
+  - list of task lists on thesortBranch task list (yes...)
 - MC mode
   - dir-like navi as /list/task
   - second pane

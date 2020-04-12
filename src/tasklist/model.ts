@@ -31,11 +31,11 @@ export type TRev = {
 export type TSelection = [number, number, boolean];
 
 export function getRootTasks(tasks: TTask[]): TTask[] {
-  return tasks.filter(t => t.parent === undefined);
+  return tasks.filter((t) => t.parent === undefined);
 }
 
 export function getChildren(id: TTaskID, tasks: TTask[]): TTask[] {
-  return tasks.filter(t => t.parent === id);
+  return tasks.filter((t) => t.parent === id);
 }
 
 export function getFirstChild(id: TTaskID, tasks: TTask[]): TTask | null {
@@ -48,7 +48,7 @@ export function getFirstChild(id: TTaskID, tasks: TTask[]): TTask | null {
 }
 
 export function getTaskByID(id: TTaskID, tasks: TTask[]): TTask {
-  const task = tasks.find(task => task.id === id);
+  const task = tasks.find((task) => task.id === id);
   assert(task);
   return task!;
 }
@@ -189,11 +189,11 @@ export function add(
 export function getNext(id: TTaskID, tasks: TTask[]): TTask | null {
   const siblings = sortBranch(getSiblings(id, tasks));
 
-  return (
-    siblings.reduce((prev, task) => {
-      return prev?.position < task.position ? prev : task;
-    }) || null
-  );
+  return siblings.length
+    ? siblings.reduce((prev, task) => {
+        return prev?.position < task.position ? prev : task;
+      })
+    : null;
 }
 
 // TODO iso date?
@@ -209,10 +209,10 @@ export function createTask(task: Partial<TTask> = {}): TTask {
     duedate: "",
     created: now(),
     updated: now(),
-    position: 0
+    position: 0,
   };
   return {
     ...defaults,
-    ...task
+    ...task,
   };
 }
