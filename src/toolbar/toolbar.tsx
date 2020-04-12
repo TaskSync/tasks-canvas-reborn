@@ -24,7 +24,7 @@ export type ToolbarProps = {
 };
 
 // TODO dividers are 0 height
-export default function(props: ToolbarProps) {
+export default function (props: ToolbarProps) {
   const {
     id,
     selection,
@@ -36,7 +36,7 @@ export default function(props: ToolbarProps) {
     setShowCompleted,
     dispatchList,
     setFocusedID,
-    setSelection
+    setSelection,
   } = props;
   const classes = useStyles({});
 
@@ -59,7 +59,7 @@ export default function(props: ToolbarProps) {
       selection,
       store,
       setFocusedID,
-      setSelection
+      setSelection,
     });
   }
 

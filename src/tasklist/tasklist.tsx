@@ -8,7 +8,7 @@ import React, {
   useState,
   useEffect,
   SyntheticEvent,
-  Fragment
+  Fragment,
 } from "react";
 import { useBeforeunload } from "react-beforeunload";
 // @ts-ignore
@@ -22,7 +22,7 @@ import {
   TSelection,
   TTask,
   TTaskID,
-  getRootTasks
+  getRootTasks,
 } from "./model";
 import { Store } from "./store";
 import useStyles from "./styles";
@@ -31,12 +31,12 @@ import {
   getSelection,
   isMacOS,
   ctrlMetaPressed,
-  flipSelectionBackwards
+  flipSelectionBackwards,
 } from "./utils";
 
 const log = debug("canvas");
 
-export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
+export default function ({ tasks, store }: { tasks: TTask[]; store: Store }) {
   const classes = useStyles({});
   const [list, dispatchList] = useReducer(reducer, tasks);
   const rootTasks = getRootTasks(list);
@@ -107,7 +107,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       store,
       id: focusedID,
       title: node.textContent || "",
-      selection
+      selection,
     });
   });
 
@@ -182,7 +182,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         store,
         id,
         title: target.textContent || "",
-        selection
+        selection,
       });
       resetUndoCounters();
     }
@@ -261,7 +261,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         store,
         selection,
         setFocusedID,
-        setSelection
+        setSelection,
       });
     }
 
@@ -280,7 +280,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         selection,
         store,
         setFocusedID,
-        setSelection
+        setSelection,
       });
       // reset undo bc of an action
       resetUndoCounters();
@@ -298,7 +298,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
           store,
           setSelection,
           setFocusedID,
-          setManualTaskTitle
+          setManualTaskTitle,
         });
       } else {
         // reset undo to avoid a fake revision
@@ -308,7 +308,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
           store,
           setSelection,
           setFocusedID,
-          setManualTaskTitle
+          setManualTaskTitle,
         });
       }
     }
@@ -376,7 +376,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
             id,
             title,
             store,
-            selection
+            selection,
           });
           resetUndoCounters();
           setUILock(false);
@@ -405,7 +405,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
           store,
           id,
           title: nodeRefs[id].textContent || "",
-          selection
+          selection,
         });
       }
       // flip the checkbox
@@ -414,7 +414,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
         id,
         completed: !input.checked,
         store,
-        selection
+        selection,
       });
       event.preventDefault();
     }
@@ -443,7 +443,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       store,
       id,
       title,
-      selection: preBlurSelection
+      selection: preBlurSelection,
     });
   }
 
@@ -457,7 +457,7 @@ export default function({ tasks, store }: { tasks: TTask[]; store: Store }) {
       content: task.content || "",
       duedate: task.duedate || undefined,
       completed: task.completed,
-      selection
+      selection,
     });
   }
 

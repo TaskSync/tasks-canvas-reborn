@@ -23,7 +23,7 @@ export class Store {
     this.revs.unshift({
       tasks: deepcopy(tasks),
       focusedID,
-      selection
+      selection,
     });
     // trim
     this.revs.length = Math.min(this.revs.length, this.maxRevs);

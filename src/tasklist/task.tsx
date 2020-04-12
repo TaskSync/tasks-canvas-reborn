@@ -10,7 +10,7 @@ function Task({
   task,
   focusedID,
   setNodeRef,
-  setFormVisible
+  setFormVisible,
 }: {
   task: TTask;
   focusedID: TTaskID;
@@ -92,7 +92,7 @@ export function EditField(props: EditFieldProps) {
       contentEditable={true}
       suppressContentEditableWarning={true}
       className={className}
-      ref={node => {
+      ref={(node) => {
         if (!node) {
           return;
         }

@@ -9,7 +9,7 @@ export default [
     updated: now(),
     created: now(),
     content: "",
-    duedate: ""
+    duedate: "",
   },
   {
     id: "1-2 foo",
@@ -19,7 +19,7 @@ export default [
     updated: now(),
     created: now(),
     content: "",
-    duedate: ""
+    duedate: "",
   },
   {
     id: "3 foo",
@@ -28,7 +28,7 @@ export default [
     updated: now(),
     created: now(),
     content: "",
-    duedate: ""
+    duedate: "",
   },
   {
     id: "4 foo",
@@ -37,6 +37,6 @@ export default [
     updated: now(),
     created: now(),
     content: "",
-    duedate: ""
-  }
+    duedate: "",
+  },
 ] as TTask[];

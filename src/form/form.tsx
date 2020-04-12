@@ -6,9 +6,9 @@ import React, { useEffect, ChangeEvent, KeyboardEvent, useState } from "react";
 import { TTask } from "../tasklist/model";
 import useStyles from "./styles";
 
-export default function({
+export default function ({
   task,
-  handleSubmit
+  handleSubmit,
 }: // TODO setCompleted (dispatcher)
 {
   task: TTask;
@@ -22,7 +22,7 @@ export default function({
   function onChange(event: ChangeEvent<HTMLTextAreaElement>) {
     setEdited({
       ...task,
-      content: event.target.value
+      content: event.target.value,
     });
   }
 

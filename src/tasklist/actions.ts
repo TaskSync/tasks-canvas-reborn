@@ -14,7 +14,7 @@ import {
   TTask,
   TTaskID,
   getVisibleNext,
-  add
+  add,
 } from "./model";
 import { sortTasks } from "./sorting";
 import Store from "./store";

@@ -75,6 +75,6 @@ export function t(text: string, task?: Partial<TTask>): TTask {
     position: task?.position || 0,
     parent: task?.parent || undefined,
     content: "",
-    duedate: ""
+    duedate: "",
   };
 }

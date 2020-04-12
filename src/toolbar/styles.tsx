@@ -8,20 +8,20 @@ export default makeStyles((_: Theme) =>
       "min-height": "2em",
       padding: "0 0.5em",
       // TODO gradient
-      background: "lightgray"
+      background: "lightgray",
     },
     grow: {
-      flexGrow: 1
+      flexGrow: 1,
     },
     divider: {
       height: "1em",
-      margin: "0 0.2em"
+      margin: "0 0.2em",
     },
     sectionRight: {
-      display: "flex"
+      display: "flex",
     },
     buttonIcon: {
-      "margin-right": "0.2em"
+      "margin-right": "0.2em",
     },
     button: {
       "border-width": "0 !important",
@@ -29,7 +29,7 @@ export default makeStyles((_: Theme) =>
       height: "auto !important",
       "text-transform": "initial !important",
       padding: "0 0.4em !important",
-      "min-width": "20px"
-    }
+      "min-width": "20px",
+    },
   })
 );

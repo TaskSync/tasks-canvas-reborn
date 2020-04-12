@@ -11,7 +11,7 @@ import {
   TMoveUp,
   moveUp,
   TMoveDown,
-  moveDown
+  moveDown,
 } from "./actions";
 import { TSelection, TTask, TTaskID } from "./model";
 import MockStore from "./store.mock";
@@ -25,7 +25,7 @@ describe("actions", () => {
     action: (tasks: TTask[], action: TAction) => TTask[],
     actionData: Partial<TAction>
   ) {
-    return function(
+    return function (
       _: string,
       input: string,
       output: string,
@@ -39,7 +39,7 @@ describe("actions", () => {
       const after = action(tasks, {
         id,
         selection,
-        ...actionData
+        ...actionData,
       });
       expect(tasksToString(after)).toEqual(expected);
     };
@@ -60,7 +60,7 @@ describe("actions", () => {
       setFocusedID(_: string) {},
       setSelection(_: TSelection) {},
       type: "newline",
-      store
+      store,
     };
 
     const tests = [
@@ -76,7 +76,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [1, 1]
+        [1, 1],
       ],
 
       [
@@ -93,7 +93,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [1, 1]
+        [1, 1],
       ],
 
       [
@@ -108,7 +108,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [1, 1]
+        [1, 1],
       ],
 
       [
@@ -127,7 +127,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [1, 2]
+        [1, 2],
       ],
 
       [
@@ -148,7 +148,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [1, 2]
+        [1, 2],
       ],
 
       [
@@ -167,8 +167,8 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [1, 2]
-      ]
+        [1, 2],
+      ],
     ];
 
     test.each(tests)(
@@ -182,7 +182,7 @@ describe("actions", () => {
     // mock
     const indentMock: Pick<TIndent, "type" | "store"> = {
       type: "indent",
-      store
+      store,
     };
 
     const tests = [
@@ -196,7 +196,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -212,7 +212,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -228,7 +228,7 @@ describe("actions", () => {
         // id
         "3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -245,7 +245,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -264,7 +264,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -281,7 +281,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 1]
+        [0, 1],
       ],
 
       [
@@ -299,7 +299,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 1]
+        [0, 1],
       ],
 
       [
@@ -315,7 +315,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 1]
+        [0, 1],
       ],
 
       [
@@ -335,8 +335,8 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 1]
-      ]
+        [0, 1],
+      ],
     ];
 
     test.each(tests)(
@@ -350,7 +350,7 @@ describe("actions", () => {
     // mock
     const outdentMock: Pick<TOutdent, "type" | "store"> = {
       type: "outdent",
-      store
+      store,
     };
 
     const tests = [
@@ -364,7 +364,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -376,7 +376,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -388,7 +388,7 @@ describe("actions", () => {
         // id
         "3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -404,7 +404,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -422,7 +422,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -440,7 +440,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -454,8 +454,8 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
-      ]
+        [0, 0],
+      ],
     ];
 
     test.each(tests)(
@@ -474,7 +474,7 @@ describe("actions", () => {
       type: "mergePrevLine",
       store,
       setFocusedID(_: TTaskID) {},
-      setSelection(_: TSelection) {}
+      setSelection(_: TSelection) {},
     };
 
     const tests = [
@@ -488,7 +488,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -503,7 +503,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -518,7 +518,7 @@ describe("actions", () => {
         // id
         "3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -533,7 +533,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -552,7 +552,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -571,7 +571,7 @@ describe("actions", () => {
         // id
         "1-3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -586,8 +586,8 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
-      ]
+        [0, 0],
+      ],
     ];
 
     test.each(tests)(
@@ -601,7 +601,7 @@ describe("actions", () => {
     // mock
     const moveUpMock: Pick<TMoveUp, "type" | "store"> = {
       type: "moveUp",
-      store
+      store,
     };
 
     const tests = [
@@ -615,7 +615,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -631,7 +631,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -647,7 +647,7 @@ describe("actions", () => {
         // id
         "3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -665,7 +665,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -683,7 +683,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -703,7 +703,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -723,7 +723,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -743,8 +743,8 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
-      ]
+        [0, 0],
+      ],
     ];
 
     test.each(tests)(
@@ -758,7 +758,7 @@ describe("actions", () => {
     // mock
     const moveDownMock: Pick<TMoveDown, "type" | "store"> = {
       type: "moveDown",
-      store
+      store,
     };
 
     const tests = [
@@ -775,7 +775,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -791,7 +791,7 @@ describe("actions", () => {
         // id
         "2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -804,7 +804,7 @@ describe("actions", () => {
         // id
         "3",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -822,7 +822,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -838,7 +838,7 @@ describe("actions", () => {
         // id
         "1-1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -858,7 +858,7 @@ describe("actions", () => {
         // id
         "1-2",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -878,7 +878,7 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
+        [0, 0],
       ],
 
       [
@@ -898,8 +898,8 @@ describe("actions", () => {
         // id
         "1",
         // selection
-        [0, 0]
-      ]
+        [0, 0],
+      ],
     ];
 
     test.each(tests)(

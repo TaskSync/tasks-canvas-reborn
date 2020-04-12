@@ -6,7 +6,7 @@ import Store from "./tasklist/store";
 import TaskList from "./tasklist/tasklist";
 
 const store = new Store();
-const tasks = store.get() || mockTasks
+const tasks = store.get() || mockTasks;
 // const tasks = mockTasks
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // @ts-ignore
 window.canvasExport = () => {
   const blob = new Blob([JSON.stringify(store.get())], {
-    type: "application/json"
+    type: "application/json",
   });
   const date = new Date();
   saveAs(blob, "tasks-" + date.toISOString() + ".json");
