@@ -7,7 +7,7 @@
     "build:prod": "yarn set-build:prod; parcel build --out-dir dist/build src/index.html",
     "build:compat": "yarn set-build:compat; parcel build --out-dir dist/build-compat src/index.html",
     "start": "yarn set-build:prod; parcel src/index.html",
-    "deploy": "yarn build:prod; now deploy dist/build --name canvas --prod",
+    "deploy": "yarn build:prod; cp -R .now dist/build; now deploy dist/build --prod",
     "test": "jest",
     "test:watch": "jest --watch"
   },

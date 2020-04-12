@@ -5,3 +5,4 @@ dist/*
 /.browserslistrc
 .vscode
 /yarn-error.log
+/.now

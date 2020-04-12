@@ -3,6 +3,7 @@
 ## BUGS
 - caret position when navigating up/down should be persisted
   - introduce `restoreSelection` hook?
+- `yarn deploy` needs magic (setup and cp)
 - select & delete doesnt preserve selection
 - undo broke
   - looks like a race condition
