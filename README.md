@@ -17,7 +17,7 @@ URL: [canvas.taskbot.app](https://canvas.taskbot.app)
 
 Please [report any issues](https://github.com/TaskSync/tasks-canvas-reborn/issues/new).
 
-![screenshot](https://tasksync.github.io/tasks-canvas-reborn/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/TobiaszCudnik/tasks-canvas-reborn/master/docs/screenshot.png)
 
 ## Progress
 
