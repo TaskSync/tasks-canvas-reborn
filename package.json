@@ -51,7 +51,7 @@
     "@types/react-beforeunload": "^2.1.0",
     "babel-jest": "^24.9.0",
     "cypress": "^4.3.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "react-beforeunload": "^2.1.0"
   }
 }
